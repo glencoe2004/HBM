@@ -169,7 +169,6 @@ public class ChunkRadiationHandlerSimple extends ChunkRadiationHandler {
 		}
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void receiveChunkUnload(ChunkEvent.Unload event) {
 
@@ -179,7 +178,7 @@ public class ChunkRadiationHandlerSimple extends ChunkRadiationHandler {
 			if(radWorld != null) {
 				radWorld.radiation.remove(event.getChunk());
 			}
-		} 
+		}
 	}
 
 	public static class SimpleRadiationPerWorld {

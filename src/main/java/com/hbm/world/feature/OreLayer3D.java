@@ -2,10 +2,9 @@ package com.hbm.world.feature;
 
 import java.util.Random;
 
-import com.hbm.dim.WorldProviderCelestial;
-
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
@@ -28,7 +27,6 @@ public class OreLayer3D {
 	Block block;
 	int meta;
 	int dim = 0;
-	boolean allCelestials = false;
 	
 	public OreLayer3D(Block block, int meta) {
 		this.block = block;
@@ -40,12 +38,6 @@ public class OreLayer3D {
 	
 	public OreLayer3D setDimension(int dim) {
 		this.dim = dim;
-		return this;
-	}
-
-	// If enabled, this vein will spawn on all celestial bodies
-	public OreLayer3D setGlobal(boolean value) {
-		this.allCelestials = value;
 		return this;
 	}
 	
@@ -69,18 +61,7 @@ public class OreLayer3D {
 
 		World world = event.world;
 		
-		if(world.provider == null) return;
-
-		Block replace = Blocks.stone;
-		if(world.provider instanceof WorldProviderCelestial) {
-			replace = ((WorldProviderCelestial)world.provider).getStone();
-		}
-
-		if(allCelestials) {
-			if(!(world.provider instanceof WorldProviderCelestial) && world.provider.dimensionId != 0) return;
-		} else {
-			if(world.provider.dimensionId != this.dim) return;
-		}
+		if(world.provider == null || world.provider.dimensionId != this.dim) return;
 
 		if(this.noiseX == null) this.noiseX = new NoiseGeneratorPerlin(new Random(event.world.getSeed() + 101 + id), 4);
 		if(this.noiseY == null) this.noiseY = new NoiseGeneratorPerlin(new Random(event.world.getSeed() + 102 + id), 4);
@@ -99,7 +80,7 @@ public class OreLayer3D {
 					if(nX * nY * nZ > threshold) {
 						Block target = world.getBlock(x, y, z);
 						
-						if(target.isNormalCube() && target.isReplaceableOreGen(world, x, y, z, replace)) {
+						if(target.isNormalCube() && target.getMaterial() == Material.rock && target.isReplaceableOreGen(world, x, y, z, Blocks.stone)) {
 							world.setBlock(x, y, z, block, meta, 2);
 						}
 					}

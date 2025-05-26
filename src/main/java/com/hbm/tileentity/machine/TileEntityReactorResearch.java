@@ -5,10 +5,8 @@ import java.util.List;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.config.MobConfig;
-import com.hbm.config.RadiationConfig;
 import com.hbm.handler.CompatHandler;
 import com.hbm.handler.radiation.ChunkRadiationManager;
-import com.hbm.hazard.type.HazardTypeNeutron;
 import com.hbm.interfaces.IControlReceiver;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.container.ContainerReactorResearch;
@@ -19,9 +17,6 @@ import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.util.BufferUtil;
 import com.hbm.util.CompatEnergyControl;
-import com.hbm.util.ContaminationUtil;
-import com.hbm.util.ContaminationUtil.ContaminationType;
-import com.hbm.util.ContaminationUtil.HazardType;
 
 import api.hbm.tile.IInfoProviderEC;
 import cpw.mods.fml.common.Optional;
@@ -34,7 +29,6 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
@@ -156,46 +150,7 @@ public class TileEntityReactorResearch extends TileEntityMachineBase implements 
 
 			if(level > 0 && heat > 0 && !(blocksRad(xCoord + 1, yCoord + 1, zCoord) && blocksRad(xCoord - 1, yCoord + 1, zCoord) && blocksRad(xCoord, yCoord + 1, zCoord + 1) && blocksRad(xCoord, yCoord + 1, zCoord - 1))) {
 				float rad = (float) heat / (float) maxHeat * 50F;
-				double range = 25D;
 				ChunkRadiationManager.proxy.incrementRad(worldObj, xCoord, yCoord, zCoord, rad);
-				List<EntityLivingBase> entities = worldObj.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5).expand(range, range, range));
-				
-				if(!RadiationConfig.disableNeutron) {
-					for(EntityLivingBase e : entities) {
-						Vec3 vec = Vec3.createVectorHelper(e.posX - (xCoord + 0.5), (e.posY + e.getEyeHeight()) - (yCoord + 0.5), e.posZ - (zCoord + 0.5));
-						double len = vec.lengthVector();
-						vec = vec.normalize();
-						
-						float res = 0;
-						
-						for(int i = 1; i < len; i++) {
-
-							int ix = (int)Math.floor(xCoord + 0.5 + vec.xCoord * i);
-							int iy = (int)Math.floor(yCoord + 0.5 + vec.yCoord * i);
-							int iz = (int)Math.floor(zCoord + 0.5 + vec.zCoord * i);
-							
-							res += worldObj.getBlock(ix, iy, iz).getExplosionResistance(null);
-						}
-						
-						if(res < 1)
-							res = 1;
-						
-						float eRads = rad;
-						eRads /= (float)res;
-						eRads /= (float)(len * len);
-						
-						ContaminationUtil.contaminate(e, HazardType.NEUTRON, ContaminationType.CREATIVE, eRads);
-						if(e instanceof EntityPlayer) {
-							EntityPlayer player = (EntityPlayer) e;
-							for(int i = 0; i < player.inventory.mainInventory.length; i++) {
-								HazardTypeNeutron.apply(player.inventory.getStackInSlot(i), eRads);
-							}
-							for(int i = 0; i < player.inventory.armorInventory.length; i++) {
-								HazardTypeNeutron.apply(player.inventory.armorItemInSlot(i), eRads);
-							}
-						}
-					}
-				}				
 			}
 
 			this.networkPackNT(150);

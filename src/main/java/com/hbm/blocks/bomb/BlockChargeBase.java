@@ -10,13 +10,11 @@ import static net.minecraftforge.common.util.ForgeDirection.WEST;
 import java.util.List;
 import java.util.Random;
 
-import com.hbm.config.GeneralConfig;
 import com.hbm.blocks.BlockContainerBase;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.entity.item.EntityTNTPrimedBase;
 import com.hbm.interfaces.IBomb;
 import com.hbm.tileentity.bomb.TileEntityCharge;
-import com.hbm.main.MainRegistry;
 
 import api.hbm.block.IFuckingExplode;
 import api.hbm.block.IToolable;
@@ -24,7 +22,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -197,14 +194,4 @@ public abstract class BlockChargeBase extends BlockContainerBase implements IBom
 			return false;
 		}
 	}
-
-	@Override
-	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack itemStack) {
-		if(!world.isRemote) {
-			if(GeneralConfig.enableExtendedLogging) {
-				MainRegistry.logger.info("[BOMBPL]" + this.getLocalizedName() + " placed at " + x + " / " + y + " / " + z + "! " + "by "+ player.getCommandSenderName());
-			}
-		}
-	}
-	
 }

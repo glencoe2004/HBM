@@ -8,7 +8,6 @@ import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTank;
 import com.hbm.inventory.fluid.trait.FT_Combustible;
-import com.hbm.inventory.fluid.trait.FT_Polluting;
 import com.hbm.inventory.fluid.trait.FluidTrait.FluidReleaseType;
 import com.hbm.inventory.gui.GUICombustionEngine;
 import com.hbm.items.ModItems;
@@ -72,6 +71,7 @@ public class TileEntityMachineCombustionEngine extends TileEntityMachinePollutin
 	public void updateEntity() {
 
 		if(!worldObj.isRemote) {
+
 			this.tank.loadTank(0, 1, slots);
 			if(this.tank.setType(4, slots)) {
 				this.tenth = 0;
@@ -87,24 +87,22 @@ public class TileEntityMachineCombustionEngine extends TileEntityMachinePollutin
 				double eff = piston.eff[trait.getGrade().ordinal()];
 
 				if(eff > 0) {
-					if(breatheAir(worldObj.getTotalWorldTime() % 5 == 0 ? setting : 0)) {
-						int speed = setting * 2;
+					int speed = setting * 2;
 
-						int toBurn = Math.min(fill, speed);
-						this.power += toBurn * (trait.getCombustionEnergy() / 10_000D) * eff;
-						fill -= toBurn;
+					int toBurn = Math.min(fill, speed);
+					this.power += toBurn * (trait.getCombustionEnergy() / 10_000D) * eff;
+					fill -= toBurn;
 
-						if(worldObj.getTotalWorldTime() % 5 == 0 && toBurn > 0) {
-							super.pollute(tank.getTankType(), FluidReleaseType.BURN, toBurn * 0.5F);
-						}
-
-						if(toBurn > 0) {
-							wasOn = true;
-						}
-
-						tank.setFill(fill / 10);
-						tenth = fill % 10;
+					if(worldObj.getTotalWorldTime() % 5 == 0 && toBurn > 0) {
+						super.pollute(tank.getTankType(), FluidReleaseType.BURN, toBurn * 0.5F);
 					}
+
+					if(toBurn > 0) {
+						wasOn = true;
+					}
+
+					tank.setFill(fill / 10);
+					tenth = fill % 10;
 				}
 			}
 

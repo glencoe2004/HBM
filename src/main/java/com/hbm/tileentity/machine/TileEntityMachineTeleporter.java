@@ -3,26 +3,18 @@ package com.hbm.tileentity.machine;
 import java.util.Iterator;
 import java.util.List;
 
-import com.hbm.config.GeneralConfig;
-import com.hbm.config.WorldConfig;
-import com.hbm.inventory.fluid.Fluids;
-import com.hbm.inventory.fluid.tank.FluidTank;
 import com.hbm.tileentity.IBufPacketReceiver;
 import com.hbm.tileentity.TileEntityLoadedBase;
 
-import api.hbm.fluid.IFluidStandardReceiver;
 import api.hbm.energymk2.IEnergyReceiverMK2;
 import com.hbm.util.BufferUtil;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.ReflectionHelper;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -39,7 +31,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements IEnergyReceiverMK2, IFluidStandardReceiver, IBufPacketReceiver {
+public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements IEnergyReceiverMK2, IBufPacketReceiver {
 
 	public long power = 0;
 	public int targetX = -1;
@@ -48,21 +40,11 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 	public int targetDim = 0;
 	public static final int maxPower = 1_500_000;
 	public static final int consumption = 1_000_000;
-	public static final int flucu = 100;
-
-	public FluidTank tank;
-
-	public TileEntityMachineTeleporter() {
-		tank = new FluidTank(Fluids.NMASS, 16000);
-		
-	}
 
 	@Override
 	public void updateEntity() {
 
 		if(!this.worldObj.isRemote) {
-			this.subscribeToAllAround(tank.getTankType(), this);
-
 			for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) this.trySubscribe(worldObj, xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ, dir);
 
 			if(this.targetY != -1) {
@@ -79,7 +61,7 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 
 		} else {
 
-			if(this.targetY != -1 && power >= consumption && this.tank.getFill() >= flucu) {
+			if(this.targetY != -1 && power >= consumption) {
 				double x = xCoord + 0.5 + worldObj.rand.nextGaussian() * 0.25D;
 				double y = yCoord + 1 + worldObj.rand.nextDouble() * 2D;
 				double z = zCoord + 0.5 + worldObj.rand.nextGaussian() * 0.25D;
@@ -92,7 +74,6 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 	public void serialize(ByteBuf buf) {
 		buf.writeLong(power);
 		BufferUtil.writeIntArray(buf, new int[] {targetX, targetY, targetZ, targetDim});
-		this.tank.serialize(buf);
 	}
 
 	@Override
@@ -103,7 +84,6 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 		this.targetY = target[1];
 		this.targetZ = target[2];
 		this.targetDim = target[3];
-		this.tank.deserialize(buf);
 	}
 
 	@Override
@@ -115,8 +95,6 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 		targetY = nbt.getInteger("y1");
 		targetZ = nbt.getInteger("z1");
 		targetDim = nbt.getInteger("dim");
-		this.tank.readFromNBT(nbt, "tt");
-
 	}
 
 	@Override
@@ -128,19 +106,13 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 		nbt.setInteger("y1", targetY);
 		nbt.setInteger("z1", targetZ);
 		nbt.setInteger("dim", targetDim);
-		tank.writeToNBT(nbt, "tt");
-
 	}
 
 	public void teleport(Entity entity) {
 
 		if(this.power < consumption) return;
-		if(entity.dimension != this.targetDim && tank.getFill() < flucu) return; // N-MASS is required for cross-dimension teleporting
-		worldObj.playSoundEffect(xCoord + 0.5, yCoord + 1.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F);
 
-		if(entity.dimension != this.targetDim) {
-			this.tank.setFill(this.tank.getFill() - flucu);
-		}
+		worldObj.playSoundEffect(xCoord + 0.5, yCoord + 1.5, zCoord + 0.5, "mob.endermen.portal", 1.0F, 1.0F);
 
 		if((entity instanceof EntityPlayerMP)) {
 
@@ -260,15 +232,5 @@ public class TileEntityMachineTeleporter extends TileEntityLoadedBase implements
 	@Override
 	public long getMaxPower() {
 		return maxPower;
-	}
-
-	@Override
-	public FluidTank[] getAllTanks() {
-		return new FluidTank[] {tank};
-	}
-
-	@Override
-	public FluidTank[] getReceivingTanks() {
-		return new FluidTank[] {tank};
 	}
 }

@@ -8,9 +8,7 @@ import com.hbm.config.ServerConfig;
 import com.hbm.entity.mob.EntityTaintCrab;
 import com.hbm.entity.mob.EntityCreeperTainted;
 import com.hbm.explosion.ExplosionLarge;
-import com.hbm.explosion.vanillant.ExplosionVNT;
 import com.hbm.extprop.HbmLivingProps;
-import com.hbm.extprop.HbmPlayerProps;
 import com.hbm.items.ModItems;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.util.ContaminationUtil;
@@ -23,13 +21,10 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.monster.EntitySkeleton;
-import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 
 public class HbmPotion extends Potion {
@@ -47,14 +42,6 @@ public class HbmPotion extends Potion {
 	public static HbmPotion potionsickness;
 	public static HbmPotion death;
 
-	public static HbmPotion run;
-
-	public static HbmPotion nitan;
-	public static HbmPotion flashbang;
-
-	public static HbmPotion slippery; //t
-
-
 	public HbmPotion(int id, boolean isBad, int color) {
 		super(id, isBad, color);
 	}
@@ -71,12 +58,7 @@ public class HbmPotion extends Potion {
 		phosphorus = registerPotion(PotionConfig.phosphorusID, true, 0xFFFF00, "potion.hbm_phosphorus", 1, 1);
 		stability = registerPotion(PotionConfig.stabilityID, false, 0xD0D0D0, "potion.hbm_stability", 2, 1);
 		potionsickness = registerPotion(PotionConfig.potionsicknessID, false, 0xff8080, "potion.hbm_potionsickness", 3, 1);
-		death = registerPotion(PotionConfig.deathID, false, 1118481, "potion.hbm_death", 4, 1);
-		run = registerPotion(PotionConfig.runID, true, 1118481, "potion.hbm_run", 14, 0);
-		nitan = registerPotion(PotionConfig.nitanID, false, 8388736, "potion.hbm_nitan", 3, 1);
-		flashbang = registerPotion(PotionConfig.flashbangID, false, 0xD0D0D0, "potion.hbm_flashbang", 15, 1);
-		slippery = registerPotion(PotionConfig.slipperyID, false, 0xD0D0D0, "potion.hbm_slippery", 15, 0);
-
+		death = registerPotion(PotionConfig.deathID, false, 0x111111, "potion.hbm_death", 4, 1);
 	}
 
 	public static HbmPotion registerPotion(int id, boolean isBad, int color, String name, int x, int y) {
@@ -85,29 +67,29 @@ public class HbmPotion extends Potion {
 
 			Potion[] newArray = new Potion[Math.max(256, id)];
 			System.arraycopy(Potion.potionTypes, 0, newArray, 0, Potion.potionTypes.length);
-
+			
 			Field field = ReflectionHelper.findField(Potion.class, new String[] { "field_76425_a", "potionTypes" });
 			field.setAccessible(true);
-
+			
 			try {
-
+				
 				Field modfield = Field.class.getDeclaredField("modifiers");
 				modfield.setAccessible(true);
 				modfield.setInt(field, field.getModifiers() & 0xFFFFFFEF);
 				field.set(null, newArray);
-
+				
 			} catch (Exception e) {
-
+				
 			}
 		}
-
+		
 		HbmPotion effect = new HbmPotion(id, isBad, color);
 		effect.setPotionName(name);
 		effect.setIconIndex(x, y);
-
+		
 		return effect;
 	}
-
+	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public int getStatusIconIndex() {
@@ -117,20 +99,20 @@ public class HbmPotion extends Potion {
 	}
 
 	public void performEffect(EntityLivingBase entity, int level) {
-
+		
 		if(entity.worldObj.isRemote) return;
 
 		if(this == taint) {
-
+			
 			if(!(entity instanceof EntityCreeperTainted) && !(entity instanceof EntityTaintCrab) && entity.worldObj.rand.nextInt(40) == 0)
 				entity.attackEntityFrom(ModDamageSource.taint, (level + 1));
-
+			
 			if(ServerConfig.TAINT_TRAILS.get() && !entity.worldObj.isRemote) {
-
+				
 				int x = (int) Math.floor(entity.posX);
 				int y = (int) Math.floor(entity.posY);
 				int z = (int) Math.floor(entity.posZ);
-
+				
 				Block b = entity.worldObj.getBlock(x, y - 1, z);
 				if(y > 1 && b.isNormalCube() && !b.isAir(entity.worldObj, x, y - 1, z)) {
 					entity.worldObj.setBlock(x, y - 1, z, ModBlocks.taint, 14, 2);
@@ -142,14 +124,10 @@ public class HbmPotion extends Potion {
 		}
 		if(this == radaway) {
 			HbmLivingProps.incrementRadiation(entity, -(level + 1));
-
-		}
-		if(this == slippery) {
-			entity.motionY += 0.026D;
-
+			
 		}
 		if(this == bang) {
-
+			
 			entity.attackEntityFrom(ModDamageSource.bang, 1000);
 			entity.setHealth(0.0F);
 
@@ -158,46 +136,18 @@ public class HbmPotion extends Potion {
 
 			entity.worldObj.playSoundEffect(entity.posX, entity.posY, entity.posZ, "hbm:weapon.laserBang", 100.0F, 1.0F);
 			ExplosionLarge.spawnParticles(entity.worldObj, entity.posX, entity.posY, entity.posZ, 10);
-
+			
 			if(entity instanceof EntityCow) {
 				EntityCow cow = (EntityCow) entity;
 				int toDrop = cow.isChild() ? 10 : 3;
 				cow.entityDropItem(new ItemStack(ModItems.cheese, toDrop), 1.0F);
 			}
 		}
-		if(this == run) {
-
-			entity.attackEntityFrom(ModDamageSource.run, 1000);
-			entity.setHealth(0.0F);
-			//World world = Minecraft.getMinecraft().theWorld;
-
-			new ExplosionVNT(entity.worldObj, entity.posX, entity.posY, entity.posZ, 12).makeAmat().explode();
-			entity.worldObj.playSoundEffect(entity.posX, entity.posY, entity.posZ, "hbm:weapon.mukeExplosion", 100.0F, 1.0F);
-
-			if (!(entity instanceof EntityPlayer))
-				entity.setDead();
-		}
 		if(this == lead) {
 			entity.attackEntityFrom(ModDamageSource.lead, (level + 1));
 		}
 		if(this == phosphorus) {
 			entity.setFire(1);
-		}
-        if(this == nitan && !entity.worldObj.isRemote) {
-        	if(entity instanceof EntityPlayer) {
-				HbmPlayerProps props = HbmPlayerProps.getData((EntityPlayer) entity);
-
-				if (props.nitanCount == 3) {
-					entity.attackEntityFrom(ModDamageSource.nitan, 1000);
-				}
-			}
-
-		}
-		if(this == flashbang && !entity.worldObj.isRemote){
-			if(entity instanceof EntityZombie || entity instanceof EntitySkeleton){
-				entity.setFire(20);
-				}
-			entity.addPotionEffect(new PotionEffect(moveSlowdown.id,5,10));
 		}
 	}
 
@@ -206,35 +156,30 @@ public class HbmPotion extends Potion {
 		if(this == taint) {
 			return par1 % 2 == 0;
 		}
-
-
-		if(this == radiation || this == radaway || this == phosphorus || this == nitan || this == slippery) {
-
+		
+		if(this == radiation || this == radaway || /*this == telekinesis ||*/ this == phosphorus) {
 			return true;
 		}
-
+		
 		if(this == bang) {
 			return par1 <= 10;
 		}
-		if(this == run) {
-			return par1 <= 10;
-		}
-
+		
 		if(this == lead) {
 			int k = 60;
 			return k > 0 ? par1 % k == 0 : true;
 		}
-
+		
 		return false;
 	}
-
+	
 	public static boolean getIsBadEffect(Potion potion) {
-
+		
 		try {
 			Field isBadEffect = ReflectionHelper.findField(Potion.class, "isBadEffect", "field_76418_K");
 			boolean ret = isBadEffect.getBoolean(potion);
 			return ret;
-
+			
 		} catch (Exception x) {
 			return false;
 		}

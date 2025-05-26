@@ -3,15 +3,13 @@ package com.hbm.tileentity.machine.storage;
 import api.hbm.energymk2.IEnergyReceiverMK2.ConnectionPriority;
 import api.hbm.fluidmk2.FluidNode;
 import api.hbm.fluidmk2.IFluidStandardTransceiverMK2;
+import api.ntm1of90.compat.fluid.adapter.ForgeFluidHandlerAdapter;
+import api.ntm1of90.compat.fluid.registry.FluidMappingRegistry;
+import net.minecraftforge.fluids.IFluidHandler;
 
 import java.util.HashSet;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.entity.effect.EntityCloudFleija;
-import com.hbm.entity.effect.EntityNukeTorex;
-import com.hbm.entity.logic.EntityBalefire;
-import com.hbm.entity.logic.EntityNukeExplosionMK3;
-import com.hbm.explosion.vanillant.ExplosionVNT;
 import com.hbm.handler.CompatHandler;
 import com.hbm.inventory.FluidContainerRegistry;
 import com.hbm.inventory.container.ContainerBarrel;
@@ -26,7 +24,6 @@ import com.hbm.lib.Library;
 import com.hbm.saveddata.TomSaveData;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.IGUIProvider;
-import com.hbm.tileentity.IOverpressurable;
 import com.hbm.tileentity.IPersistentNBT;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.uninos.UniNodespace;
@@ -43,6 +40,7 @@ import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
@@ -51,12 +49,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 @Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
-public class TileEntityBarrel extends TileEntityMachineBase implements SimpleComponent, IFluidStandardTransceiverMK2, IPersistentNBT, IGUIProvider, CompatHandler.OCComponent, IFluidCopiable, IOverpressurable {
+public class TileEntityBarrel extends TileEntityMachineBase implements SimpleComponent, IFluidStandardTransceiverMK2, IPersistentNBT, IGUIProvider, CompatHandler.OCComponent, IFluidCopiable, IFluidHandler {
 
 	protected FluidNode node;
 	protected FluidType lastType;
 
-	public boolean hasExploded = false;
 	public FluidTank tank;
 	public short mode = 0;
 	public static final short modes = 4;
@@ -103,58 +100,53 @@ public class TileEntityBarrel extends TileEntityMachineBase implements SimpleCom
 			}
 			this.lastRedstone = comp;
 
-			if(!this.hasExploded) {
-				tank.setType(0, 1, slots);
-				tank.loadTank(2, 3, slots);
-				tank.unloadTank(4, 5, slots);
+			tank.setType(0, 1, slots);
+			tank.loadTank(2, 3, slots);
+			tank.unloadTank(4, 5, slots);
 
-				// In buffer mode, acts like a pipe block, providing fluid to its own node
-				// otherwise, it is a regular providing/receiving machine, blocking further propagation
-				if(mode == 1) {
+			// In buffer mode, acts like a pipe block, providing fluid to its own node
+			// otherwise, it is a regular providing/receiving machine, blocking further propagation
+			if(mode == 1) {
+				if(this.node == null || this.node.expired || tank.getTankType() != lastType) {
+
+					this.node = (FluidNode) UniNodespace.getNode(worldObj, xCoord, yCoord, zCoord, tank.getTankType().getNetworkProvider());
+
 					if(this.node == null || this.node.expired || tank.getTankType() != lastType) {
-
-						this.node = (FluidNode) UniNodespace.getNode(worldObj, xCoord, yCoord, zCoord, tank.getTankType().getNetworkProvider());
-
-						if(this.node == null || this.node.expired || tank.getTankType() != lastType) {
-							this.node = this.createNode(tank.getTankType());
-							UniNodespace.createNode(worldObj, this.node);
-							lastType = tank.getTankType();
-						}
-					}
-
-					if(node != null && node.hasValidNet()) {
-						node.net.addProvider(this);
-						node.net.addReceiver(this);
-					}
-				} else {
-					if(this.node != null) {
-						UniNodespace.destroyNode(worldObj, xCoord, yCoord, zCoord, tank.getTankType().getNetworkProvider());
-						this.node = null;
-					}
-
-					for(DirPos pos : getConPos()) {
-						FluidNode dirNode = (FluidNode) UniNodespace.getNode(worldObj, pos.getX(), pos.getY(), pos.getZ(), tank.getTankType().getNetworkProvider());
-
-						if(mode == 2) {
-							tryProvide(tank, worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
-						} else {
-							if(dirNode != null && dirNode.hasValidNet()) dirNode.net.removeProvider(this);
-						}
-
-						if(mode == 0) {
-							if(dirNode != null && dirNode.hasValidNet()) dirNode.net.addReceiver(this);
-						} else {
-							if(dirNode != null && dirNode.hasValidNet()) dirNode.net.removeReceiver(this);
-						}
+						this.node = this.createNode(tank.getTankType());
+						UniNodespace.createNode(worldObj, this.node);
+						lastType = tank.getTankType();
 					}
 				}
 
-				if(tank.getFill() > 0) {
-					checkFluidInteraction();
+				if(node != null && node.hasValidNet()) {
+					node.net.addProvider(this);
+					node.net.addReceiver(this);
 				}
-			} else if(this.node != null) {
-				UniNodespace.destroyNode(worldObj, xCoord, yCoord, zCoord, tank.getTankType().getNetworkProvider());
-				this.node = null;
+			} else {
+				if(this.node != null) {
+					UniNodespace.destroyNode(worldObj, xCoord, yCoord, zCoord, tank.getTankType().getNetworkProvider());
+					this.node = null;
+				}
+
+				for(DirPos pos : getConPos()) {
+					FluidNode dirNode = (FluidNode) UniNodespace.getNode(worldObj, pos.getX(), pos.getY(), pos.getZ(), tank.getTankType().getNetworkProvider());
+
+					if(mode == 2) {
+						tryProvide(tank, worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
+					} else {
+						if(dirNode != null && dirNode.hasValidNet()) dirNode.net.removeProvider(this);
+					}
+
+					if(mode == 0) {
+						if(dirNode != null && dirNode.hasValidNet()) dirNode.net.addReceiver(this);
+					} else {
+						if(dirNode != null && dirNode.hasValidNet()) dirNode.net.removeReceiver(this);
+					}
+				}
+			}
+
+			if(tank.getFill() > 0) {
+				checkFluidInteraction();
 			}
 
 			this.networkPackNT(50);
@@ -241,8 +233,7 @@ public class TileEntityBarrel extends TileEntityMachineBase implements SimpleCom
 		//for when you fill antimatter into a matter tank
 		if(b != ModBlocks.barrel_antimatter && tank.getTankType().isAntimatter()) {
 			worldObj.func_147480_a(xCoord, yCoord, zCoord, false);
-			new ExplosionVNT(worldObj, xCoord, yCoord, zCoord, 5).makeAmat().explode();
-			//worldObj.newExplosion(null, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, 5, true, true);
+			worldObj.newExplosion(null, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, 5, true, true);
 		}
 
 		//for when you fill hot or corrosive liquids into a plastic tank
@@ -392,42 +383,6 @@ public class TileEntityBarrel extends TileEntityMachineBase implements SimpleCom
 	}
 
 	@Override
-	public void explode(World world, int x, int y, int z) {
-		if(tank.getTankType() == Fluids.AMAT || tank.getTankType() == Fluids.ASCHRAB) {
-			float amat = Math.min(tank.getFill() / 100, 90);
-			float aschrab = Math.min(tank.getFill() / 100, 90);
-			if(this.hasExploded && !worldObj.isRemote) {
-				if(amat > 0) {
-					if(amat >= 25) {
-						EntityBalefire bf = new EntityBalefire(worldObj);
-						bf.antimatter();
-						bf.setPosition(xCoord, yCoord, zCoord);
-						bf.destructionRange = (int) amat;
-						worldObj.spawnEntityInWorld(bf);
-						EntityNukeTorex.startFacAnti(worldObj, xCoord, yCoord, zCoord, amat * 1.5F);
-						return;
-					} else {
-						new ExplosionVNT(worldObj, xCoord, yCoord, zCoord, amat).makeAmat().explode();
-					}
-				}
-				if(aschrab > 0) {
-					EntityNukeExplosionMK3 ex = EntityNukeExplosionMK3.statFacFleija(worldObj, xCoord + 0.5, yCoord + 0.5, zCoord + 0.5, (int) aschrab);
-					if(!ex.isDead) {
-						worldObj.spawnEntityInWorld(ex);
-
-						EntityCloudFleija cloud = new EntityCloudFleija(worldObj, (int) aschrab);
-						cloud.setPosition(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5);
-						worldObj.spawnEntityInWorld(cloud);
-					}
-					return;
-				}
-			}
-		}
-
-		this.markChanged();
-	}
-
-	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public String[] methods() {
 		return new String[] {
@@ -452,5 +407,61 @@ public class TileEntityBarrel extends TileEntityMachineBase implements SimpleCom
 				return getInfo(context, args);
 		}
 		throw new NoSuchMethodException();
+
+	}
+
+	// Forge IFluidHandler implementation
+
+	private ForgeFluidHandlerAdapter forgeAdapter = new ForgeFluidHandlerAdapter() {
+		@Override
+		protected FluidTank[] getHbmTanks() {
+			return new FluidTank[] { tank };
+		}
+
+		@Override
+		protected TileEntity getTileEntity() {
+			return TileEntityBarrel.this;
+		}
+
+		@Override
+		protected boolean isValidDirection(ForgeDirection from) {
+			// Only allow fluid transfer if the barrel is in the right mode
+			return (mode == 0 || mode == 1); // Only allow in input or buffer mode
+		}
+	};
+
+	static {
+		// Initialize the fluid mapping registry
+		FluidMappingRegistry.initialize();
+	}
+
+	@Override
+	public int fill(ForgeDirection from, net.minecraftforge.fluids.FluidStack resource, boolean doFill) {
+		return forgeAdapter.fill(from, resource, doFill);
+	}
+
+	@Override
+	public net.minecraftforge.fluids.FluidStack drain(ForgeDirection from, net.minecraftforge.fluids.FluidStack resource, boolean doDrain) {
+		return forgeAdapter.drain(from, resource, doDrain);
+	}
+
+	@Override
+	public net.minecraftforge.fluids.FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
+		return forgeAdapter.drain(from, maxDrain, doDrain);
+	}
+
+	@Override
+	public boolean canFill(ForgeDirection from, net.minecraftforge.fluids.Fluid fluid) {
+		return forgeAdapter.canFill(from, fluid);
+	}
+
+	@Override
+	public boolean canDrain(ForgeDirection from, net.minecraftforge.fluids.Fluid fluid) {
+		return forgeAdapter.canDrain(from, fluid);
+	}
+
+	@Override
+	public net.minecraftforge.fluids.FluidTankInfo[] getTankInfo(ForgeDirection from) {
+		return forgeAdapter.getTankInfo(from);
 	}
 }

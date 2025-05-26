@@ -30,13 +30,6 @@ public class GUIMachineTurbofan extends GuiInfoContainer {
 	public void drawScreen(int mouseX, int mouseY, float f) {
 		super.drawScreen(mouseX, mouseY, f);
 
-		//diFurnace.tank[0].renderTankInfo(this, mouseX, mouseY, guiLeft + 53, guiTop + 69 - 52, 34, 52);
-		//diFurnace.tank[1].renderTankInfo(this, mouseX, mouseY, guiLeft + 130, guiTop + 69 - 52, 34, 52);
-		//this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 157 - 9, guiTop + 69 - 52, 16, 52, diFurnace.power, diFurnace.maxPower);
-
-		//String[] text = new String[] { "Acceptable upgrades:",
-				//" -Pink (afterburner)" };
-		//this.drawCustomInfoStat(mouseX, mouseY, guiLeft + 96, guiTop + 21, 8, 8, guiLeft + 96, guiTop + 21 + 16, text);
 		turbofan.tank.renderTankInfo(this, mouseX, mouseY, guiLeft + 35, guiTop + 17, 34, 52);
 		if(turbofan.showBlood) turbofan.blood.renderTankInfo(this, mouseX, mouseY, guiLeft + 98, guiTop + 17, 16, 16);
 		this.drawElectricityInfo(this, mouseX, mouseY, guiLeft + 143, guiTop + 17, 16, 52, turbofan.power, turbofan.maxPower);
@@ -56,10 +49,6 @@ public class GUIMachineTurbofan extends GuiInfoContainer {
 		Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
 		
-		//if(diFurnace.power > 0) {
-		//	int i = (int)diFurnace.getPowerScaled(52);
-		//	drawTexturedModalRect(guiLeft + 161 - 9, guiTop + 69 - i, 176 + 16, 52 - i, 16, i);
-		//}
 		int i = (int)turbofan.getPowerScaled(52);
 		drawTexturedModalRect(guiLeft + 152 - 9, guiTop + 69 - i, 176 + 16, 52 - i, 16, i);
 		
@@ -68,10 +57,6 @@ public class GUIMachineTurbofan extends GuiInfoContainer {
 			drawTexturedModalRect(guiLeft + 98, guiTop + 44, 176, (a - 1) * 16, 16, 16);
 		}
 
-		//this.drawInfoPanel(guiLeft + 96, guiTop + 21, 8, 8, 8);
-		
-		//diFurnace.tank[0].renderTank(guiLeft + 53, guiTop + 69, this.zLevel, 34, 52);
-		//diFurnace.tank[1].renderTank(guiLeft + 130, guiTop + 69, this.zLevel, 16, 52);
 		if(turbofan.showBlood) GaugeUtil.renderGauge(Gauge.ROUND_SMALL, guiLeft + 97, guiTop + 16, this.zLevel, (double) turbofan.blood.getFill() / (double) turbofan.blood.getMaxFill());
 		turbofan.tank.renderTank(guiLeft + 35, guiTop + 69, this.zLevel, 34, 52);
 	}

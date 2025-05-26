@@ -3,7 +3,6 @@ package com.hbm.blocks.fluid;
 import java.util.List;
 import java.util.Random;
 
-import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
 
@@ -24,9 +23,9 @@ import net.minecraftforge.fluids.Fluid;
 public class GenericFluidBlock extends BlockFluidClassic {
 
 	@SideOnly(Side.CLIENT)
-	public IIcon stillIcon;
+	public static IIcon stillIcon;
 	@SideOnly(Side.CLIENT)
-	public IIcon flowingIcon;
+	public static IIcon flowingIcon;
 	public Random rand = new Random();
 	
 	private String stillName;
@@ -63,9 +62,9 @@ public class GenericFluidBlock extends BlockFluidClassic {
 	}
 
 	/** Only temporary, will be moved into a subclass */
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onEntityCollidedWithBlock(World world, int x, int y, int z, Entity entity) {
+		
 		if(damageSource != null) {
 			
 			if(entity instanceof EntityItem) {
@@ -77,7 +76,7 @@ public class GenericFluidBlock extends BlockFluidClassic {
 				if(entity.ticksExisted % 20 == 0 && !world.isRemote) {
 					entity.attackEntityFrom(damageSource, damage * 0.1F);
 					
-					if(this == ModBlocks.sulfuric_acid_block && entity.isDead && ((EntityItem)entity).getEntityItem().getItem() == Items.slime_ball) {
+					if(entity.isDead && ((EntityItem)entity).getEntityItem().getItem() == Items.slime_ball) {
 						List<EntityPlayer> players = world.getEntitiesWithinAABB(EntityPlayer.class, entity.boundingBox.expand(10, 10, 10));
 						
 						for(EntityPlayer player : players)
@@ -102,5 +101,4 @@ public class GenericFluidBlock extends BlockFluidClassic {
 			}
 		}
 	}
-
 }

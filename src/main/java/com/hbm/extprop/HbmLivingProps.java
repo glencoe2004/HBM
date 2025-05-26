@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.hbm.config.RadiationConfig;
-import com.hbm.dim.trait.CBT_Atmosphere;
 import com.hbm.entity.mob.EntityDuck;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.lib.ModDamageSource;
@@ -49,14 +48,10 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 	private int bombTimer;
 	private int contagion;
 	private int oil;
-	private float activation;
-	private int oxygen = 100;
 	public int fire;
 	public int phosphorus;
 	public int balefire;
 	private List<ContaminationEffect> contamination = new ArrayList();
-	private CBT_Atmosphere atmosphere;
-	private boolean gravity = false;
 
 	public HbmLivingProps(EntityLivingBase entity) {
 		this.entity = entity;
@@ -101,32 +96,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 			radiation = 0;
 
 		data.setRadiation(entity, radiation);
-	}
-	
-	/// NEUTRON ACTIVATION ///
-	public static float getNeutronActivation(EntityLivingBase entity) {
-		if(RadiationConfig.disableNeutron)
-			return 0;
-
-		return getData(entity).activation;
-	}
-	
-	public static void setNeutronActivation(EntityLivingBase entity, float rad) {
-		if(!RadiationConfig.disableNeutron)
-			getData(entity).activation = rad;
-	}
-	
-	public static void incrementNeutronActivation(EntityLivingBase entity, float rad) {
-		if(RadiationConfig.disableNeutron)
-			return;
-		
-		HbmLivingProps data = getData(entity);
-		float neutrons = getData(entity).activation + rad;
-		
-		if(neutrons < 0)
-			neutrons = 0;
-		
-		data.setNeutronActivation(entity, neutrons);
 	}
 
 	/// RAD ENV ///
@@ -254,23 +223,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 		}
 	}
 
-	//ATMOSPHERE//
-	public static int getOxy(EntityLivingBase entity) {
-		return getData(entity).oxygen;
-	}
-	
-	public static void setOxy(EntityLivingBase entity, int oxygen) {
-		if(oxygen <= 0) {
-			oxygen = 0;
-
-			// Only damage every 4 ticks, giving the player more time to react
-			if(entity.ticksExisted % 4 == 0) {
-				entity.attackEntityFrom(ModDamageSource.oxyprime, 1);
-			}
-		}
-
-		getData(entity).oxygen = oxygen;
-	}
 
 	/// BLACK LUNG DISEASE ///
 	public static int getBlackLung(EntityLivingBase entity) {
@@ -319,22 +271,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 	public static int getOil(EntityLivingBase entity) { return getData(entity).oil; }
 	public static void setOil(EntityLivingBase entity, int oil) { getData(entity).oil = oil; }
 
-	/// ATMOSPHERE ///
-	public static CBT_Atmosphere getAtmosphere(EntityLivingBase entity) {
-		return getData(entity).atmosphere;
-	}
-
-	public static void setAtmosphere(EntityLivingBase entity, CBT_Atmosphere atmosphere) {
-		HbmLivingProps data = getData(entity);
-		data.atmosphere = atmosphere;
-		data.gravity = atmosphere != null;
-	}
-
-	// and gravity (attached to atmospheres, for now)
-	public static boolean hasGravity(EntityLivingBase entity) {
-		return getData(entity).gravity;
-	}
-
 	@Override
 	public void init(Entity entity, World world) { }
 
@@ -346,12 +282,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 		buf.writeInt(contagion);
 		buf.writeInt(blacklung);
 		buf.writeInt(oil);
-		buf.writeInt(oxygen);
-		buf.writeBoolean(gravity);
-		buf.writeFloat(activation);
-		buf.writeInt(fire);
-		buf.writeInt(phosphorus);
-		buf.writeInt(balefire);
 		buf.writeInt(this.contamination.size());
 		for (ContaminationEffect contaminationEffect : this.contamination) {
 			contaminationEffect.serialize(buf); // long ass buffers? uh, yes please!
@@ -367,12 +297,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 			contagion = buf.readInt();
 			blacklung = buf.readInt();
 			oil = buf.readInt();
-			oxygen = buf.readInt();
-			gravity = buf.readBoolean();
-			activation = buf.readFloat();
-			fire = buf.readInt();
-			phosphorus = buf.readInt();
-			balefire = buf.readInt();
 			int size = buf.readInt();
 			for (int i = 0; i < size; i++) {
 				this.contamination.add(ContaminationEffect.deserialize(buf));
@@ -393,9 +317,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 		props.setInteger("hfr_contagion", contagion);
 		props.setInteger("hfr_blacklung", blacklung);
 		props.setInteger("hfr_oil", oil);
-		props.setInteger("hfr_oxygen", oxygen);
-		props.setFloat("hfr_activation", activation);
-		props.setBoolean("hfr_gravity", gravity);
 		props.setInteger("hfr_fire", fire);
 		props.setInteger("hfr_phosphorus", phosphorus);
 		props.setInteger("hfr_balefire", balefire);
@@ -423,9 +344,6 @@ public class HbmLivingProps implements IExtendedEntityProperties {
 			contagion = props.getInteger("hfr_contagion");
 			blacklung = props.getInteger("hfr_blacklung");
 			oil = props.getInteger("hfr_oil");
-			activation = props.getFloat("hfr_activation");
-			oxygen = props.getInteger("hfr_oxygen");
-			gravity = props.getBoolean("hfr_gravity");
 			fire = props.getInteger("hfr_fire");
 			phosphorus = props.getInteger("hfr_phosphorus");
 			balefire = props.getInteger("hfr_balefire");

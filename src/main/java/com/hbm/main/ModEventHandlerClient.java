@@ -5,9 +5,6 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockAshes;
 import com.hbm.config.ClientConfig;
 import com.hbm.config.GeneralConfig;
-import com.hbm.config.SpaceConfig;
-import com.hbm.dim.WorldProviderCelestial;
-import com.hbm.dim.orbit.WorldProviderOrbit;
 import com.hbm.entity.mob.EntityHunterChopper;
 import com.hbm.entity.projectile.EntityChopperMine;
 import com.hbm.entity.train.EntityRailCarRidable;
@@ -20,9 +17,7 @@ import com.hbm.handler.HazmatRegistry;
 import com.hbm.handler.HbmKeybinds;
 import com.hbm.handler.ImpactWorldHandler;
 import com.hbm.handler.HbmKeybinds.EnumKeybind;
-import com.hbm.hazard.HazardRegistry;
 import com.hbm.hazard.HazardSystem;
-import com.hbm.hazard.type.HazardTypeNeutron;
 import com.hbm.interfaces.IHoldableWeapon;
 import com.hbm.interfaces.IItemHUD;
 import com.hbm.interfaces.Spaghetti;
@@ -42,7 +37,6 @@ import com.hbm.items.weapon.sedna.ItemGunBaseNT;
 import com.hbm.lib.Library;
 import com.hbm.lib.RefStrings;
 import com.hbm.packet.PacketDispatcher;
-import com.hbm.potion.HbmPotion;
 import com.hbm.packet.toserver.AuxButtonPacket;
 import com.hbm.packet.toserver.GunButtonPacket;
 import com.hbm.packet.toserver.KeybindPacket;
@@ -54,6 +48,8 @@ import com.hbm.render.util.RenderAccessoryUtility;
 import com.hbm.render.util.RenderOverhead;
 import com.hbm.render.util.RenderScreenOverlay;
 import com.hbm.render.util.SoyuzPronter;
+import com.hbm.render.world.RenderNTMSkyboxChainloader;
+import com.hbm.render.world.RenderNTMSkyboxImpact;
 import com.hbm.sound.MovingSoundChopper;
 import com.hbm.sound.MovingSoundChopperMine;
 import com.hbm.sound.MovingSoundCrashing;
@@ -73,7 +69,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
@@ -83,8 +78,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.gui.GuiMainMenu;
@@ -97,7 +90,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -110,11 +102,11 @@ import net.minecraft.network.play.client.C0CPacketInput;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.*;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.IItemRenderer;
+import net.minecraftforge.client.IRenderHandler;
 import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
@@ -207,7 +199,6 @@ public class ModEventHandlerClient {
 			}
 		}
 
-
 		/// DODD DIAG HOOK FOR RBMK
 		if(event.type == ElementType.CROSSHAIRS && ClientConfig.DODD_RBMK_DIAGNOSTIC.get()) {
 			Minecraft mc = Minecraft.getMinecraft();
@@ -216,7 +207,7 @@ public class ModEventHandlerClient {
 
 			if(mop != null) {
 
-				if(mop.typeOfHit == MovingObjectType.BLOCK) {
+				if(mop.typeOfHit == mop.typeOfHit.BLOCK) {
 
 					if(player.getHeldItem() != null && player.getHeldItem().getItem() instanceof ILookOverlay) {
 						((ILookOverlay) player.getHeldItem().getItem()).printHook(event, world, mop.blockX, mop.blockY, mop.blockZ);
@@ -229,14 +220,14 @@ public class ModEventHandlerClient {
 					text.add("Meta: " + world.getBlockMetadata(mop.blockX, mop.blockY, mop.blockZ));
 					ILookOverlay.printGeneric(event, "DEBUG", 0xffff00, 0x4040000, text);*/
 
-				} else if(mop.typeOfHit == MovingObjectType.ENTITY) {
+				} else if(mop.typeOfHit == mop.typeOfHit.ENTITY) {
 					Entity entity = mop.entityHit;
 
 					if(entity instanceof ILookOverlay) {
 						((ILookOverlay) entity).printHook(event, world, 0, 0, 0);
 					}
 				}
-
+				
 				GL11.glColor4f(1F, 1F, 1F, 1F);
 			}
 
@@ -357,7 +348,7 @@ public class ModEventHandlerClient {
 		/// HANDLE SCOPE OVERLAY ///
 		ItemStack held = player.getHeldItem();
 
-		if(player.isSneaking() && held != null && held.getItem() instanceof ItemGunBase && event.type == ElementType.HOTBAR)  {
+		if(player.isSneaking() && held != null && held.getItem() instanceof ItemGunBase && event.type == event.type.HOTBAR)  {
 			GunConfiguration config = ((ItemGunBase) held.getItem()).mainConfig;
 
 			if(config.scopeTexture != null) {
@@ -380,17 +371,13 @@ public class ModEventHandlerClient {
 			Minecraft.getMinecraft().ingameGUI.highlightingItemStack = held;
 		}
 
-		/// HANDLE FLASHBANG OVERLAY///
-		if(player.isPotionActive(HbmPotion.flashbang)) {
-			RenderScreenOverlay.renderFlashbangOverlay(event.resolution);
-		}
 		/// HANDLE FSB HUD ///
 		ItemStack helmet = player.inventory.armorInventory[3];
 
 		if(helmet != null && helmet.getItem() instanceof ArmorFSB) {
 			((ArmorFSB)helmet.getItem()).handleOverlay(event, player);
 		}
-		if(!event.isCanceled() && event.type == ElementType.HOTBAR) {
+		if(!event.isCanceled() && event.type == event.type.HOTBAR) {
 
 			HbmPlayerProps props = HbmPlayerProps.getData(player);
 			if(props.getDashCount() > 0) {
@@ -405,7 +392,7 @@ public class ModEventHandlerClient {
 
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 
-		if(event.type == ElementType.ARMOR) {
+		if(event.type == event.type.ARMOR) {
 
 			HbmPlayerProps props = HbmPlayerProps.getData(player);
 			if(props.getEffectiveMaxShield() > 0) {
@@ -422,20 +409,7 @@ public class ModEventHandlerClient {
 		EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 		Tessellator tess = Tessellator.instance;
 
-		if(!event.isCanceled() && event.type == ElementType.HEALTH) {
-			if(player.isPotionActive(HbmPotion.nitan)) {
-				RenderScreenOverlay.renderTaintBar(event.resolution, Minecraft.getMinecraft().ingameGUI);
-			}
-		}
-
-		if (!event.isCanceled() && event.type == ElementType.ALL) {
-			long time = ImpactWorldHandler.getTimeForClient(player.worldObj);
-			if(time > 0) {
-				RenderScreenOverlay.renderCountdown(event.resolution, Minecraft.getMinecraft().ingameGUI, Minecraft.getMinecraft().theWorld);
-			}
-		}
-
-		if(event.type == ElementType.ARMOR) {
+		if(event.type == event.type.ARMOR) {
 
 			if(ForgeHooks.getTotalArmorValue(player) == 0) {
 				GuiIngameForge.left_height -= 10;
@@ -667,29 +641,6 @@ public class ModEventHandlerClient {
 		}
 	}
 
-	private static final ResourceLocation MUSIC_LOCATION = new ResourceLocation("hbm:music.game.space");
-	private ISound currentSong;
-
-	@SubscribeEvent
-	public void onPlayMusic(PlaySoundEvent17 event) {
-		ResourceLocation r = event.sound.getPositionedSoundLocation();
-		if(Minecraft.getMinecraft().theWorld == null) return;
-		if(!r.toString().equals("minecraft:music.game.creative") && !r.toString().equals("minecraft:music.game")) return;
-
-		// Prevent songs playing over the top of each other
-		if(Minecraft.getMinecraft().getSoundHandler().isSoundPlaying(currentSong)) {
-			event.setResult(Result.DENY);
-			event.result = null;
-			return;
-		}
-
-		// Replace the sound if we're not on Earth
-		WorldProvider provider = Minecraft.getMinecraft().theWorld.provider;
-		if((provider instanceof WorldProviderCelestial || provider instanceof WorldProviderOrbit) && provider.dimensionId != 0) {
-			event.result = currentSong = PositionedSoundRecord.func_147673_a(MUSIC_LOCATION);
-		}
-	}
-
 	@Spaghetti("please get this shit out of my face")
 	@SubscribeEvent
 	public void onPlaySound(PlaySoundEvent17 e) {
@@ -707,8 +658,6 @@ public class ModEventHandlerClient {
 				e.result = null;
 				return;
 			}
-
-
 		}
 
 		ResourceLocation r = e.sound.getPositionedSoundLocation();
@@ -827,25 +776,6 @@ public class ModEventHandlerClient {
 				list.add(EnumChatFormatting.BLUE + "Ore Dict:");
 				for(String s : names) {
 					list.add(EnumChatFormatting.AQUA + " -" + s);
-				}
-			}
-		}
-
-		///NEUTRON ACTIVATION
-		float level = 0;
-		float rads = HazardSystem.getHazardLevelFromStack(stack, HazardRegistry.RADIATION);
-		if(rads == 0) {
-			if(stack.hasTagCompound() && stack.stackTagCompound.hasKey(HazardTypeNeutron.NEUTRON_KEY)) {
-				level += stack.stackTagCompound.getFloat(HazardTypeNeutron.NEUTRON_KEY);
-			}
-
-			if(level >= 1e-5) {
-				list.add(EnumChatFormatting.GREEN + "[" + I18nUtil.resolveKey("trait.radioactive") + "]");
-				String rads2 = "" + (Math.floor(level* 1000) / 1000);
-				list.add(EnumChatFormatting.YELLOW + (rads2 + "RAD/s"));
-
-				if(stack.stackSize > 1) {
-					list.add(EnumChatFormatting.YELLOW + "Stack: " + ((Math.floor(level * 1000 * stack.stackSize) / 1000) + "RAD/s"));
 				}
 			}
 		}
@@ -997,12 +927,12 @@ public class ModEventHandlerClient {
 			if(BlockAshes.ashes < 0) BlockAshes.ashes = 0;
 
 			if(mc.theWorld.getTotalWorldTime() % 20 == 0) {
-				lastBrightness = currentBrightness;
+				this.lastBrightness = this.currentBrightness;
 				currentBrightness = mc.theWorld.getLightBrightnessForSkyBlocks(MathHelper.floor_double(mc.thePlayer.posX), MathHelper.floor_double(mc.thePlayer.posY), MathHelper.floor_double(mc.thePlayer.posZ), 0);
 			}
 
 			if(ArmorUtil.isWearingEmptyMask(mc.thePlayer)) {
-				MainRegistry.proxy.displayTooltip(EnumChatFormatting.RED + "Your mask has no filter!", ServerProxy.ID_FILTER);
+				MainRegistry.proxy.displayTooltip(EnumChatFormatting.RED + "Your mask has no filter!", MainRegistry.proxy.ID_FILTER);
 			}
 		}
 
@@ -1082,7 +1012,7 @@ public class ModEventHandlerClient {
 
 			if(player.inventory.armorInventory[2] != null && player.inventory.armorInventory[2].getItem() instanceof ArmorFSB) {
 				ArmorFSB plate = (ArmorFSB) player.inventory.armorInventory[2].getItem();
-				if(ArmorFSB.hasFSBArmor(player)) newStepSize = plate.stepSize;
+				if(plate.hasFSBArmor(player)) newStepSize = plate.stepSize;
 			}
 
 			if(newStepSize > 0) {
@@ -1114,17 +1044,6 @@ public class ModEventHandlerClient {
 				ItemGunBaseNT.offsetHorizontal = 0;
 				ItemGunBaseNT.recoilVertical = 0;
 				ItemGunBaseNT.recoilHorizontal = 0;
-			}
-		}
-
-		if(event.phase == Phase.START && mc.theWorld.provider.dimensionId == SpaceConfig.orbitDimension) {
-			for(Object o : mc.theWorld.loadedEntityList) {
-				if(o instanceof EntityItem) {
-					EntityItem item = (EntityItem) o;
-					item.motionX *= 0.81D; // applies twice on server it seems? 0.9 * 0.9
-					item.motionY = 0.03999999910593033D;
-					item.motionZ *= 0.81D;
-				}
 			}
 		}
 	}
@@ -1168,10 +1087,31 @@ public class ModEventHandlerClient {
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void onClientTickLast(ClientTickEvent event) {
 
-		if(event.phase == Phase.START) {
-			// I didn't see anything boss, I swears it
+		if(event.phase == Phase.START && GeneralConfig.enableSkyboxes) {
+
 			World world = Minecraft.getMinecraft().theWorld;
 			if(world == null) return;
+
+			IRenderHandler sky = world.provider.getSkyRenderer();
+
+			if(world.provider instanceof WorldProviderSurface) {
+
+				if(ImpactWorldHandler.getDustForClient(world) > 0 || ImpactWorldHandler.getFireForClient(world) > 0) {
+
+					//using a chainloader isn't necessary since none of the sky effects should render anyway
+					if(!(sky instanceof RenderNTMSkyboxImpact)) {
+						world.provider.setSkyRenderer(new RenderNTMSkyboxImpact());
+						return;
+					}
+				}
+			}
+
+			if(world.provider.dimensionId == 0) {
+
+				if(!(sky instanceof RenderNTMSkyboxChainloader)) {
+					world.provider.setSkyRenderer(new RenderNTMSkyboxChainloader(sky));
+				}
+			}
 
 			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
 			long millis = System.currentTimeMillis();
@@ -1413,13 +1353,8 @@ public class ModEventHandlerClient {
 
 	public static IIcon particleBase;
 	public static IIcon particleLeaf;
-	public static IIcon particleSwen;
-	public static IIcon particleLen;
-
 	public static IIcon particleSplash;
 	public static IIcon particleAshes;
-
-	public static IIcon particleFlare;
 
 	@SubscribeEvent
 	public void onTextureStitch(TextureStitchEvent.Pre event) {
@@ -1427,13 +1362,8 @@ public class ModEventHandlerClient {
 		if(event.map.getTextureType() == 0) {
 			particleBase = event.map.registerIcon(RefStrings.MODID + ":particle/particle_base");
 			particleLeaf = event.map.registerIcon(RefStrings.MODID + ":particle/dead_leaf");
-			particleSwen = event.map.registerIcon(RefStrings.MODID + ":particle/particlenote2");
-			particleLen = event.map.registerIcon(RefStrings.MODID + ":particle/particlenote1");
-
 			particleSplash = event.map.registerIcon(RefStrings.MODID + ":particle/particle_splash");
 			particleAshes = event.map.registerIcon(RefStrings.MODID + ":particle/particle_ashes");
-
-			particleFlare = event.map.registerIcon(RefStrings.MODID + ":particle/yelflare");
 		}
 	}
 

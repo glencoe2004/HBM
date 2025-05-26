@@ -23,12 +23,18 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidHandler;
+import api.ntm1of90.compat.fluid.registry.FluidMappingRegistry;
+import api.ntm1of90.compat.fluid.bridge.NTMFluidNetworkBridge;
 
 @Optional.InterfaceList({
 		@Optional.Interface(iface = "com.hbm.handler.CompatHandler.OCComponent", modid = "opencomputers"),
 		@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")
 })
-public class TileEntityProxyCombo extends TileEntityProxyBase implements IEnergyReceiverMK2, ISidedInventory, IFluidReceiverMK2, IHeatSource, ICrucibleAcceptor, SimpleComponent, OCComponent {
+public class TileEntityProxyCombo extends TileEntityProxyBase implements IEnergyReceiverMK2, ISidedInventory, IFluidReceiverMK2, IHeatSource, ICrucibleAcceptor, SimpleComponent, OCComponent, IFluidHandler {
 
 	TileEntity tile;
 	boolean inventory;
@@ -511,5 +517,127 @@ public class TileEntityProxyCombo extends TileEntityProxyBase implements IEnergy
 		if(this.getTile() instanceof OCComponent)
 			return ((OCComponent) this.getTile()).invoke(method, context, args);
 		return OCComponent.super.invoke(null, null, null);
+	}
+
+	// Forge IFluidHandler implementation
+	static {
+		// Initialize the fluid mapping registry
+		FluidMappingRegistry.initialize();
+	}
+
+	@Override
+	public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
+		if (!fluid || resource == null || resource.amount <= 0) {
+			return 0;
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).fill(from, resource, doFill);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof IFluidReceiverMK2) {
+			return NTMFluidNetworkBridge.fillFromForge((IFluidReceiverMK2) te, resource, doFill);
+		}
+
+		return 0;
+	}
+
+	@Override
+	public FluidStack drain(ForgeDirection from, FluidStack resource, boolean doDrain) {
+		if (!fluid || resource == null || resource.amount <= 0) {
+			return null;
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).drain(from, resource, doDrain);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof api.hbm.fluidmk2.IFluidStandardSenderMK2) {
+			return NTMFluidNetworkBridge.drainToForge((api.hbm.fluidmk2.IFluidStandardSenderMK2) te, resource, doDrain);
+		}
+
+		return null;
+	}
+
+	@Override
+	public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
+		if (!fluid || maxDrain <= 0) {
+			return null;
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).drain(from, maxDrain, doDrain);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof api.hbm.fluidmk2.IFluidStandardSenderMK2) {
+			return NTMFluidNetworkBridge.drainToForge((api.hbm.fluidmk2.IFluidStandardSenderMK2) te, maxDrain, doDrain);
+		}
+
+		return null;
+	}
+
+	@Override
+	public boolean canFill(ForgeDirection from, Fluid fluid) {
+		if (!this.fluid) {
+			return false;
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).canFill(from, fluid);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof IFluidReceiverMK2) {
+			com.hbm.inventory.fluid.FluidType type = FluidMappingRegistry.getHbmFluidType(fluid);
+			return type != com.hbm.inventory.fluid.Fluids.NONE && ((IFluidReceiverMK2) te).canConnect(type, from);
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean canDrain(ForgeDirection from, Fluid fluid) {
+		if (!this.fluid) {
+			return false;
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).canDrain(from, fluid);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof api.hbm.fluidmk2.IFluidStandardSenderMK2) {
+			com.hbm.inventory.fluid.FluidType type = FluidMappingRegistry.getHbmFluidType(fluid);
+			return type != com.hbm.inventory.fluid.Fluids.NONE && ((api.hbm.fluidmk2.IFluidConnectorMK2) te).canConnect(type, from);
+		}
+
+		return false;
+	}
+
+	@Override
+	public FluidTankInfo[] getTankInfo(ForgeDirection from) {
+		if (!this.fluid) {
+			return new FluidTankInfo[0];
+		}
+
+		TileEntity te = getTile();
+		if (te instanceof IFluidHandler) {
+			return ((IFluidHandler) te).getTankInfo(from);
+		}
+
+		// If the tile entity is not a Forge fluid handler, use the NTM fluid system
+		if (te instanceof api.hbm.fluidmk2.IFluidUserMK2) {
+			return NTMFluidNetworkBridge.getTankInfo((api.hbm.fluidmk2.IFluidUserMK2) te);
+		}
+
+		return new FluidTankInfo[0];
 	}
 }

@@ -2,7 +2,6 @@ package com.hbm.blocks.generic;
 
 import java.util.Random;
 
-import com.hbm.blocks.ModBlocks;
 import com.hbm.saveddata.TomSaveData;
 
 import net.minecraft.block.Block;
@@ -42,7 +41,7 @@ public class BlockDirt extends Block {
 		return Item.getItemFromBlock(Blocks.dirt);
 	}
 
-	/*@Override
+	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
 		
 		for(int i = -1; i < 2; i++) {
@@ -55,7 +54,7 @@ public class BlockDirt extends Block {
 				}
 			}
 		}
-	}*/
+	}
 
 	@Override
 	public void updateTick(World world, int x, int y, int z, Random rand) {
@@ -66,10 +65,6 @@ public class BlockDirt extends Block {
 			int light = Math.max(world.getSavedLightValue(EnumSkyBlock.Block, x, y + 1, z), (int) (world.getBlockLightValue(x, y + 1, z) * (1 - data.dust)));
 			if(light >= 9 && data.fire == 0) {
 				world.setBlock(x, y, z, Blocks.grass);
-				if(world.getBlock(x, y-1, z)==Blocks.dirt)
-				{
-					world.setBlock(x, y-1, z, ModBlocks.impact_dirt);
-				}
 			}
 		}
 	}

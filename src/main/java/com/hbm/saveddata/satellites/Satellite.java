@@ -48,7 +48,6 @@ public abstract class Satellite {
 		registerSatellite(SatelliteMiner.class, ModItems.sat_miner);
 		registerSatellite(SatelliteLunarMiner.class, ModItems.sat_lunar_miner);
 		registerSatellite(SatelliteHorizons.class, ModItems.sat_gerald);
-		registerSatellite(SatelliteDysonRelay.class, ModItems.sat_dyson_relay);
 	}
 
 	/**
@@ -127,6 +126,4 @@ public abstract class Satellite {
 	 * @param z ditto
 	 */
 	public void onCoordAction(World world, EntityPlayer player, int x, int y, int z) { }
-
-	public abstract float[] getColor();
 }

@@ -7,7 +7,6 @@ import com.hbm.items.ModItems;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.main.MainRegistry;
 
-import api.hbm.entity.ISuffocationImmune;
 import api.hbm.entity.IRadiationImmune;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -20,7 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-public class EntityRADBeast extends EntityMob implements IRadiationImmune, ISuffocationImmune {
+public class EntityRADBeast extends EntityMob implements IRadiationImmune {
 
 	private float heightOffset = 0.5F;
 	private int heightOffsetUpdateTime;
@@ -141,7 +140,7 @@ public class EntityRADBeast extends EntityMob implements IRadiationImmune, ISuff
 			double deltaZ = target.posZ - this.posZ;
 
 			if(this.attackTime == 0 && getEntityToAttack() != null) {
-
+				
 				ChunkRadiationManager.proxy.incrementRad(worldObj, (int) Math.floor(posX), (int) Math.floor(posY), (int) Math.floor(posZ), 100);
 				target.attackEntityFrom(ModDamageSource.radiation, 16.0F);
 				this.swingItem();

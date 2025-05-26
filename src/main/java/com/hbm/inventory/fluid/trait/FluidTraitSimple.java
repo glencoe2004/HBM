@@ -6,6 +6,12 @@ import net.minecraft.util.EnumChatFormatting;
 
 public class FluidTraitSimple {
 
+	public static class FT_Gaseous extends FluidTrait {
+		@Override public void addInfoHidden(List<String> info) {
+			info.add(EnumChatFormatting.BLUE + "[Gaseous]");
+		}
+	}
+
 	/** gaseous at room temperature, for cryogenic hydrogen for example */
 	public static class FT_Gaseous_ART extends FluidTrait {
 		@Override public void addInfoHidden(List<String> info) {
@@ -47,20 +53,6 @@ public class FluidTraitSimple {
 	public static class FT_Delicious extends FluidTrait {
 		@Override public void addInfoHidden(List<String> info) {
 			info.add(EnumChatFormatting.DARK_GREEN + "[Delicious]");
-		}
-	}
-	public static class FT_ULTRAKILL extends FluidTrait {
-		@Override public void addInfoHidden(List<String> info) {
-		info.add(EnumChatFormatting.DARK_RED + "[ULTRAKILL]");
-	}}
-	public static class FT_EXPLOSIVE extends FluidTrait {
-		@Override public void addInfoHidden(List<String> info) {
-		info.add(EnumChatFormatting.RED + "[Explosive]");
-	}}
-	
-	public static class FT_Leaded extends FluidTrait {
-		@Override public void addInfoHidden(List<String> info) {
-			info.add(EnumChatFormatting.BLUE + "[Leaded Fuel]");
 		}
 	}
 

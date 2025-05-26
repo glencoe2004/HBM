@@ -22,10 +22,9 @@ public class BufferUtil {
 			buf.writeInt(-1);
 			return;
 		}
-		
-		final byte[] bytes = value.getBytes(CHARSET);
-		buf.writeInt(bytes.length);
-		buf.writeBytes(bytes);
+
+		buf.writeInt(value.getBytes(CHARSET).length);
+		buf.writeBytes(value.getBytes(CHARSET));
 	}
 
 	// Reads a string from a byte buffer via the written length and raw bytes

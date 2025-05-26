@@ -26,7 +26,7 @@ public class HbmKeybinds {
 	public static KeyBinding hudKey = new KeyBinding(category + ".toggleHUD", Keyboard.KEY_V, category);
 	public static KeyBinding dashKey = new KeyBinding(category + ".dash", Keyboard.KEY_LSHIFT, category);
 	public static KeyBinding trainKey = new KeyBinding(category + ".trainInv", Keyboard.KEY_R, category);
-	public static KeyBinding slamKey = new KeyBinding(category + ".slamkey", Keyboard.KEY_LCONTROL, category);
+	
 	public static KeyBinding copyToolAlt = new KeyBinding(category + ".copyToolAlt", Keyboard.KEY_LMENU, category);
 	public static KeyBinding copyToolCtrl = new KeyBinding(category + ".copyToolCtrl", Keyboard.KEY_LCONTROL, category);
 
@@ -48,7 +48,6 @@ public class HbmKeybinds {
 		ClientRegistry.registerKeyBinding(hudKey);
 		ClientRegistry.registerKeyBinding(dashKey);
 		ClientRegistry.registerKeyBinding(trainKey);
-		ClientRegistry.registerKeyBinding(slamKey);
 
 		ClientRegistry.registerKeyBinding(reloadKey);
 		ClientRegistry.registerKeyBinding(gunPrimaryKey);
@@ -104,7 +103,6 @@ public class HbmKeybinds {
 		TOGGLE_MAGNET,
 		TOGGLE_HEAD,
 		DASH,
-		SLAM,
 		TRAIN,
 		CRANE_UP,
 		CRANE_DOWN,

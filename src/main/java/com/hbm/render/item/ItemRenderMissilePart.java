@@ -21,8 +21,6 @@ public class ItemRenderMissilePart implements IItemRenderer {
 	
 	@Override
 	public boolean handleRenderType(ItemStack item, ItemRenderType type) {
-		if(part == null || !part.renderInventoryModel) return false;
-
 		switch(type) {
 		case EQUIPPED:
 		case EQUIPPED_FIRST_PERSON:
@@ -79,7 +77,7 @@ public class ItemRenderMissilePart implements IItemRenderer {
 			}
 			
 			if(part.type == PartType.FUSELAGE) {
-				GL11.glTranslated(0, (height / 4 - 0.5) * scale, 0);
+				GL11.glTranslated(0, height / 4 * scale, 0);
 			}
 			
 			GL11.glTranslated(3.5, 14, 0);

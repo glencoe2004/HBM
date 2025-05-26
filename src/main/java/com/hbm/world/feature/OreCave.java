@@ -4,7 +4,6 @@ import java.util.Random;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockStalagmite;
-import com.hbm.dim.WorldProviderCelestial;
 import com.hbm.inventory.RecipesCommon.MetaBlock;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -31,10 +30,6 @@ public class OreCave {
 	private int yLevel = 30;
 	private Block fluid;
 	int dim = 0;
-	boolean allCelestials = false;
-	Block override;
-	boolean ignoreWater = false;
-	boolean spawnStalagmites = true;
 	
 	public OreCave(Block ore) {
 		this(ore, 0);
@@ -75,50 +70,16 @@ public class OreCave {
 		return this;
 	}
 
-	public OreCave setBlockOverride(Block override) {
-		this.override = override;
-		return this;
-	}
-
-	public OreCave setIgnoreWater(boolean ignoreWater) {
-		this.ignoreWater = ignoreWater;
-		return this;
-	}
-
-	public OreCave setStalagmites(boolean spawnStalagmites) {
-		this.spawnStalagmites = spawnStalagmites;
-		return this;
-	}
-
-	// If enabled, this cave will spawn on all celestial bodies
-	public OreCave setGlobal(boolean value) {
-		this.allCelestials = value;
-		return this;
-	}
-
 	@SuppressWarnings("incomplete-switch")
 	@SubscribeEvent
 	public void onDecorate(DecorateBiomeEvent.Pre event) {
 		
 		World world = event.world;
 		
-		if(world.provider == null) return;
-
-		Block replace = Blocks.stone;
-		if(override != null) {
-			replace = override;
-		} else if(world.provider instanceof WorldProviderCelestial) {
-			replace = ((WorldProviderCelestial)world.provider).getStone();
-		}
-
-		if(allCelestials) {
-			if(!(world.provider instanceof WorldProviderCelestial) && world.provider.dimensionId != 0) return;
-		} else {
-			if(world.provider.dimensionId != this.dim) return;
-		}
+		if(world.provider == null || world.provider.dimensionId != this.dim) return;
 		
 		if(this.noise == null) {
-			this.noise = new NoiseGeneratorPerlin(new Random(event.world.getSeed() + (ore.hashCode() * 31) + yLevel), 2);
+			this.noise = new NoiseGeneratorPerlin(new Random(event.world.getSeed() + (ore.getID() * 31) + yLevel), 2);
 		}
 		
 		int cX = event.chunkX;
@@ -143,15 +104,14 @@ public class OreCave {
 					for(int y = yLevel - range; y <= yLevel + range; y++) {
 						Block genTarget = world.getBlock(x, y, z);
 						
-						if(genTarget.isNormalCube() && genTarget.isReplaceableOreGen(world, x, y, z, replace)) {
+						if(genTarget.isNormalCube() && (genTarget.getMaterial() == Material.rock || genTarget.getMaterial() == Material.ground) && genTarget.isReplaceableOreGen(world, x, y, z, Blocks.stone)) {
 							
 							boolean shouldGen = false;
 							boolean canGenFluid = event.rand.nextBoolean();
 							
 							for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 								Block neighbor = world.getBlock(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
-								Material material = neighbor.getMaterial();
-								if(material == Material.air || (ignoreWater && material == Material.water) || neighbor instanceof BlockStalagmite) {
+								if(neighbor.getMaterial() == Material.air || neighbor instanceof BlockStalagmite) {
 									shouldGen = true;
 								}
 								
@@ -189,14 +149,15 @@ public class OreCave {
 								world.setBlock(x, y, z, ore.block, ore.meta, 2);
 							}
 							
-						} else if(spawnStalagmites) {
-
+						} else {
+							
 							if((genTarget.getMaterial() == Material.air || !genTarget.isNormalCube()) && event.rand.nextInt(5) == 0 && !genTarget.getMaterial().isLiquid()) {
+								
 								if(ModBlocks.stalactite.canPlaceBlockAt(world, x, y, z)) {
-									world.setBlock(x, y, z, ModBlocks.stalactite, BlockStalagmite.getMetaFromResource(ore.block, ore.meta), 2);
+									world.setBlock(x, y, z, ModBlocks.stalactite, BlockStalagmite.getMetaFromResource(ore.meta), 2);
 								} else {
 									if(ModBlocks.stalagmite.canPlaceBlockAt(world, x, y, z)) {
-										world.setBlock(x, y, z, ModBlocks.stalagmite, BlockStalagmite.getMetaFromResource(ore.block, ore.meta), 2);
+										world.setBlock(x, y, z, ModBlocks.stalagmite, BlockStalagmite.getMetaFromResource(ore.meta), 2);
 									}
 								}
 							}

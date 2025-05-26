@@ -166,11 +166,10 @@ public class NukeCustom extends BlockContainer implements IBomb {
 			amat = Math.min(amat, maxAmat);
 
 			EntityBalefire bf = new EntityBalefire(worldObj);
-			bf.antimatter();
     		bf.setPosition(xCoord + 0.5, yCoord + 0.5, zCoord + 0.5);
 			bf.destructionRange = (int) amat;
 			worldObj.spawnEntityInWorld(bf);
-			EntityNukeTorex.startFacAnti(worldObj, xCoord + 0.5, yCoord + 5, zCoord + 0.5, amat);
+			EntityNukeTorex.statFacBale(worldObj, xCoord + 0.5, yCoord + 5, zCoord + 0.5, amat);
 			
 		/// HYDROGEN ///
 		} else if(hydro > 0) {

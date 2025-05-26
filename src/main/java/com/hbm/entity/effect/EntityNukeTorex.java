@@ -587,10 +587,4 @@ public class EntityNukeTorex extends Entity {
 		world.spawnEntityInWorld(torex);
 		TrackerUtil.setTrackingRange(world, torex, 1000);
 	}
-	public static void startFacAnti(World world, double x, double y, double z, float scale) {
-		EntityNukeTorex torex = new EntityNukeTorex(world).setScale(MathHelper.clamp_float(scale * 0.01F, 0.5F, 5F)).setType(2);
-		torex.setPosition(x, y, z);
-		world.spawnEntityInWorld(torex);
-		TrackerUtil.setTrackingRange(world, torex, 1000);
-	}
 }

@@ -1,5 +1,1 @@
-Includes all changes and bugfixes from the latest upstream NTMain update - [X5299 - now less comically broken](https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT/releases/tag/1.0.27_X5299)
 
-## Fixed
-* Biogas gated behind space-grade machinery due to AIR fluid requirement
-* Redstone torches erroneously don't work without O2

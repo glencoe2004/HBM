@@ -15,8 +15,6 @@ public class RadiationConfig {
 	public static boolean worldRadEffects = true;
 	public static boolean cleanupDeadDirt = false;
 
-	public static double celestialRadMultiplier = 0.25;
-
 	public static boolean enableContamination = true;
 	public static boolean enableChunkRads = true;
 	public static boolean enablePRISM = false;
@@ -28,7 +26,6 @@ public class RadiationConfig {
 	public static boolean disableHydro = false;
 	public static boolean disableBlinding = false;
 	public static boolean disableFibrosis = false;
-	public static boolean disableNeutron = true;
 
 	public static boolean enablePollution = true;
 	public static boolean enableLeadFromBlocks = true;
@@ -52,8 +49,6 @@ public class RadiationConfig {
 		worldRadThreshold = CommonConfig.createConfigInt(config, CATEGORY_NUKE, "RADWORLD_02_minimum", "The least amount of RADs required for block modification to happen", 20);
 		cleanupDeadDirt = CommonConfig.createConfigBool(config, CATEGORY_NUKE, "RADWORLD_03_regrow", "Whether dead grass and mycelium should decay into dirt", false);
 
-		celestialRadMultiplier = CommonConfig.createConfigDouble(config, CATEGORY_NUKE, "CELESTIAL_00_radMultiplier", "Radiation multiplier on celestial bodies, 1 = 1 rad/s on the Mun", 0.25D);
-
 		enableContamination = CommonConfig.createConfigBool(config, CATEGORY_NUKE, "RADIATION_00_enableContamination", "Toggles player contamination (and negative effects from radiation poisoning)", true);
 		enableChunkRads = CommonConfig.createConfigBool(config, CATEGORY_NUKE, "RADIATION_01_enableChunkRads", "Toggles the world radiation system (chunk radiation only, some blocks use an AoE!)", true);
 		enablePRISM = CommonConfig.createConfigBool(config, CATEGORY_NUKE, "RADIATION_99_enablePRISM", "Enables the new 3D resistance-aware PRISM radiation system", false);
@@ -70,7 +65,6 @@ public class RadiationConfig {
 		disableHydro = CommonConfig.createConfigBool(config, CATEGORY_HAZ, "HAZ_04_disableHydroactive", "When turned off, all hydroactive hazards are disabled", false);
 		disableBlinding = CommonConfig.createConfigBool(config, CATEGORY_HAZ, "HAZ_05_disableBlinding", "When turned off, all blinding hazards are disabled", false);
 		disableFibrosis = CommonConfig.createConfigBool(config, CATEGORY_HAZ, "HAZ_06_disableFibrosis", "When turned off, all fibrosis hazards are disabled", false);
-		disableNeutron = CommonConfig.createConfigBool(config, CATEGORY_HAZ, "HAZ_01_disableNeutrons", "When turned off, all neutron radiation hazards are disabled", true);
 
 		final String CATEGORY_POL = CommonConfig.CATEGORY_POLLUTION;
 		enablePollution = CommonConfig.createConfigBool(config, CATEGORY_POL, "POL_00_enablePollution", "If disabled, none of the polltuion related things will work", true);

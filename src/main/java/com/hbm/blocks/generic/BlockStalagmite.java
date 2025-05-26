@@ -43,14 +43,12 @@ public class BlockStalagmite extends BlockEnumMulti {
 		switch(meta) {
 		case 0: return ModItems.sulfur;
 		case 1: return ModItems.powder_asbestos;
-		case 2: return ModItems.flesh;
 		}
 		
 		return null;
 	}
 	
-	public static int getMetaFromResource(Block block, int meta) {
-		if(block == ModBlocks.tumor) return 2;
+	public static int getMetaFromResource(int meta) {
 		return meta;
 	}
 

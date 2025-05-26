@@ -14,9 +14,6 @@ public class EntityTNTPrimedBase extends Entity {
 	public boolean detonateOnCollision;
 	public int fuse;
 	private EntityLivingBase tntPlacedBy;
-	private boolean doesSpin; // SSSSSSSPEEEEEEEEEEEEEEEEEEEEEEEN
-	private float momentumPitch;
-	private float momentumYaw;
 
 	public EntityTNTPrimedBase(World world) {
 		super(world);
@@ -25,10 +22,6 @@ public class EntityTNTPrimedBase extends Entity {
 		this.yOffset = this.height / 2.0F;
 		this.fuse = 80;
 		this.detonateOnCollision = false;
-
-		doesSpin = true;
-		momentumPitch = (float) (world.rand.nextGaussian() * 5F);
-		momentumYaw =(float) (world.rand.nextGaussian() * 10F);
 	}
 
 	public EntityTNTPrimedBase(World world, double x, double y, double z, EntityLivingBase entity, Block bomb) {
@@ -62,7 +55,7 @@ public class EntityTNTPrimedBase extends Entity {
 
 	@Override
 	public void onUpdate() {
-
+		
 		this.prevPosX = this.posX;
 		this.prevPosY = this.posY;
 		this.prevPosZ = this.posZ;
@@ -72,17 +65,12 @@ public class EntityTNTPrimedBase extends Entity {
 		this.motionY *= 0.98D;
 		this.motionZ *= 0.98D;
 
-		if(doesSpin) {
-			rotationPitch += momentumPitch;
-			rotationYaw += momentumYaw;
-		}
-
 		if(this.onGround) {
 			this.motionX *= 0.7D;
 			this.motionZ *= 0.7D;
 			this.motionY *= -0.5D;
 		}
-
+		
 		if(this.fuse-- <= 0 || (this.detonateOnCollision && this.isCollided)) {
 			this.setDead();
 
@@ -97,7 +85,7 @@ public class EntityTNTPrimedBase extends Entity {
 	private void explode() {
 		this.getBomb().explodeEntity(worldObj, posX, posY, posZ, this);
 	}
-
+	
 	public IFuckingExplode getBomb() {
 		return (IFuckingExplode) getBlock();
 	}
@@ -123,7 +111,7 @@ public class EntityTNTPrimedBase extends Entity {
 	public float getShadowSize() {
 		return 0.0F;
 	}
-
+	
 	public EntityLivingBase getTntPlacedBy() {
 		return this.tntPlacedBy;
 	}

@@ -22,7 +22,6 @@ import com.hbm.main.ResourceManager;
 import com.hbm.packet.toclient.AuxParticlePacketNT;
 import com.hbm.util.DamageResistanceHandler.DamageClass;
 
-import api.hbm.entity.ISuffocationImmune;
 import api.hbm.entity.IResistanceProvider;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraft.block.Block;
@@ -46,7 +45,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class EntityGlyphid extends EntityMob implements IResistanceProvider, ISuffocationImmune {
+public class EntityGlyphid extends EntityMob implements IResistanceProvider {
 
 	//I might have overdone it a little bit
 

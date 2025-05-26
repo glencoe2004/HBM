@@ -46,7 +46,6 @@ public class MachineRecipes {
 		fuels.add(new ItemStack(ModItems.powder_lignite));
 		fuels.add(new ItemStack(ModItems.briquette));
 		fuels.add(new ItemStack(ModItems.coke));
-		fuels.add(new ItemStack(ModItems.powder_coke));
 		fuels.add(new ItemStack(ModItems.solid_fuel));
 		fuels.add(new ItemStack(ModItems.powder_coal));
 		return fuels;

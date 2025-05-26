@@ -56,8 +56,6 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
 	public MaterialStack output;
 	public static final int maxOutput = MaterialShapes.BLOCK.q(16);
 
-	private boolean canBreathe;
-
 	public int anim;
 	public int lastAnim;
 
@@ -129,7 +127,6 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
 
 			RotaryFurnaceRecipe recipe = RotaryFurnaceRecipes.getRecipe(slots[0], slots[1], slots[2]);
 			this.isProgressing = false;
-			this.canBreathe = false;
 
 			if(recipe != null) {
 
@@ -178,7 +175,7 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
 			}
 
 			this.isVenting = false;
-			if(this.burnTime > 0 && (this.canBreathe || breatheAir(1))) {
+			if(this.burnTime > 0) {
 				this.pollute(PollutionType.SOOT, PollutionHandler.SOOT_PER_SECOND / 10F);
 				this.burnTime--;
 			}
@@ -320,12 +317,10 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
 
 		if(this.output != null) {
 			if(this.output.material != recipe.output.material) return false;
-			if(this.output.amount + recipe.output.amount > maxOutput) return false;
+			if(this.output.amount + recipe.output.amount > this.maxOutput) return false;
 		}
 
-		canBreathe = breatheAir(1);
-
-		return canBreathe;
+		return true;
 	}
 
 	public void consumeItems(RotaryFurnaceRecipe recipe) {

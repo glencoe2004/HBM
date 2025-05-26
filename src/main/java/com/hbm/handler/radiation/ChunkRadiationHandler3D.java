@@ -169,14 +169,13 @@ public class ChunkRadiationHandler3D extends ChunkRadiationHandler {
 		}
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void receiveChunkUnload(ChunkEvent.Unload event) {
 		
 		if(!event.world.isRemote) {
 			ThreeDimRadiationPerWorld radWorld = perWorld.get(event.world);
 			
-			if(radWorld != null) { 
+			if(radWorld != null) {
 				radWorld.radiation.remove(event.getChunk());
 			}
 		}

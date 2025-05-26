@@ -14,8 +14,6 @@ import com.hbm.inventory.container.ContainerITER;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTank;
-import com.hbm.inventory.fluid.trait.FT_Heatable;
-import com.hbm.inventory.fluid.trait.FT_Heatable.HeatingStep;
 import com.hbm.inventory.gui.GUIITER;
 import com.hbm.inventory.recipes.BreederRecipes;
 import com.hbm.inventory.recipes.BreederRecipes.BreederRecipe;
@@ -45,7 +43,6 @@ import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.Item;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -79,14 +76,11 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 	private AudioWrapper audio;
 
 	public TileEntityITER() {
-		super(6);
-		tanks = new FluidTank[4];
+		super(5);
+		tanks = new FluidTank[2];
 		tanks[0] = new FluidTank(Fluids.WATER, 1280000);
 		tanks[1] = new FluidTank(Fluids.ULTRAHOTSTEAM, 128000);
-		tanks[2] = new FluidTank(Fluids.COOLANT, 16_000);
-		tanks[3] = new FluidTank(Fluids.COOLANT_HOT, 16_000);
 		plasma = new FluidTank(Fluids.PLASMA_DT, 16000);
-
 	}
 
 	@Override
@@ -101,15 +95,7 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 
 			this.updateConnections();
 			power = Library.chargeTEFromItems(slots, 0, power, maxPower);
-			if(tanks[2].getTankType().hasTrait(FT_Heatable.class)) {
-				FT_Heatable trait = tanks[2].getTankType().getTrait(FT_Heatable.class);
-				HeatingStep step = trait.getFirstStep();
-				tanks[3].setTankType(step.typeProduced);
-			}
-			else {
-				tanks[2].setTankType(Fluids.NONE);
-				tanks[3].setTankType(Fluids.NONE);
-			}
+
 			/// START Processing part ///
 
 			if(!isOn) {
@@ -117,7 +103,7 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 			}
 
 			//explode either if there's plasma that is too hot or if the reactor is turned on but the magnets have no power
-			if(plasma.getFill() > 0 && (this.plasma.getTankType().temperature >= this.getShield() || (this.isOn && this.power < this.powerReq || tanks[2].getFill() == 0 || tanks[3].getFill() == tanks[3].getMaxFill()))) {
+			if(plasma.getFill() > 0 && (this.plasma.getTankType().temperature >= this.getShield() || (this.isOn && this.power < this.powerReq))) {
 				this.explode();
 			}
 
@@ -143,7 +129,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 				}
 
 				int prod = FusionRecipes.getSteamProduction(plasma.getTankType());
-				int lod = FusionRecipes.getCoolant(plasma.getTankType());
 
 				for(int i = 0; i < 20; i++) {
 
@@ -153,22 +138,8 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 							tanks[0].setFill(tanks[0].getFill() - prod * 10);
 							tanks[1].setFill(tanks[1].getFill() + prod);
 
-						}
-						if(tanks[1].getFill() > tanks[1].getMaxFill()) {
-							tanks[1].setFill(tanks[1].getMaxFill());
-							tanks[0].setFill(tanks[0].getMaxFill()); //this should stop it from eating fluids when buffers are full
-						}
-
-						if(tanks[2].getFill() >= lod) {
-							int coolantToDrain = (int) (Math.min(tanks[3].getMaxFill(), tanks[2].getFill()));
-							coolantToDrain = Math.min(lod, tanks[1].getMaxFill() - tanks[1].getFill());
-							tanks[2].setFill(tanks[2].getFill() - coolantToDrain);
-							tanks[3].setFill(tanks[3].getFill() + coolantToDrain);
-
-						}
-						if(tanks[3].getFill() > tanks[3].getMaxFill()) {
-							tanks[3].setFill(tanks[3].getMaxFill());
-							tanks[2].setFill(tanks[2].getMaxFill());
+							if(tanks[1].getFill() > tanks[1].getMaxFill())
+								tanks[1].setFill(tanks[1].getMaxFill());
 						}
 
 						plasma.setFill(plasma.getFill() - 1);
@@ -185,9 +156,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 			for(DirPos pos : getConPos()) {
 				if(tanks[1].getFill() > 0) {
 					this.sendFluid(tanks[1], worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
-				}
-				if(tanks[3].getFill() > 0) {
-					this.sendFluid(tanks[3], worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
 				}
 			}
 
@@ -239,7 +207,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 		for(DirPos pos : getConPos()) {
 			this.trySubscribe(worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
 			this.trySubscribe(tanks[0].getTankType(), worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
-			this.trySubscribe(tanks[2].getTankType(), worldObj, pos.getX(), pos.getY(), pos.getZ(), pos.getDir());
 		}
 	}
 
@@ -308,9 +275,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 
 		if(slots[1] != null && slots[1].getItem() == ModItems.meteorite_sword_fused)
 			out = new BreederRecipe(ModItems.meteorite_sword_baleful, 4000);
-
-		if(slots[1] != null && slots[1].getItem() == Item.getItemFromBlock(ModBlocks.lattice_log))
-			out = new BreederRecipe(ModItems.woodemium_briquette, 4000);
 
 		if(out == null) {
 			this.progress = 0;
@@ -400,7 +364,8 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 		buf.writeBoolean(this.isOn);
 		buf.writeLong(this.power);
 		buf.writeInt(this.progress);
-		for(FluidTank tank : tanks) tank.serialize(buf);
+		tanks[0].serialize(buf);
+		tanks[1].serialize(buf);
 		plasma.serialize(buf);
 		if(slots[3] == null) {
 			buf.writeInt(0);
@@ -421,7 +386,8 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 		this.isOn = buf.readBoolean();
 		this.power = buf.readLong();
 		this.progress = buf.readInt();
-		for(FluidTank tank : tanks) tank.deserialize(buf);
+		tanks[0].deserialize(buf);
+		tanks[1].deserialize(buf);
 		plasma.deserialize(buf);
 		this.blanket = buf.readInt();
 	}
@@ -467,8 +433,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 
 		tanks[0].readFromNBT(nbt, "water");
 		tanks[1].readFromNBT(nbt, "steam");
-		tanks[2].readFromNBT(nbt, "coolant");
-		tanks[3].readFromNBT(nbt, "hotlant");
 		plasma.readFromNBT(nbt, "plasma");
 	}
 
@@ -482,8 +446,6 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 
 		tanks[0].writeToNBT(nbt, "water");
 		tanks[1].writeToNBT(nbt, "steam");
-		tanks[2].writeToNBT(nbt, "coolant");
-		tanks[3].writeToNBT(nbt, "hotlant");
 		plasma.writeToNBT(nbt, "plasma");
 	}
 
@@ -555,12 +517,12 @@ public class TileEntityITER extends TileEntityMachineBase implements IEnergyRece
 
 	@Override
 	public FluidTank[] getSendingTanks() {
-		return new FluidTank[] {tanks[1], tanks[3]};
+		return new FluidTank[] {tanks[1]};
 	}
 
 	@Override
 	public FluidTank[] getReceivingTanks() {
-		return new FluidTank[] {tanks[0], tanks[2]};
+		return new FluidTank[] {tanks[0]};
 	}
 
 	@Override
