@@ -41,7 +41,6 @@ public class LiquefactionRecipes extends SerializableRecipe {
 		recipes.put(KEY_CRACK_TAR,									new FluidStack(100, Fluids.BITUMEN));
 		recipes.put(KEY_COAL_TAR,									new FluidStack(50, Fluids.BITUMEN));
 		recipes.put(KEY_LOG,										new FluidStack(100, Fluids.MUG));
-		recipes.put(KNO.dust(),										new FluidStack(750, Fluids.NITRIC_ACID));
 		recipes.put(NA.dust(),										new FluidStack(100, Fluids.SODIUM));
 		recipes.put(PB.ingot(),										new FluidStack(100, Fluids.LEAD));
 		recipes.put(PB.dust(),										new FluidStack(100, Fluids.LEAD));
@@ -53,7 +52,8 @@ public class LiquefactionRecipes extends SerializableRecipe {
 		recipes.put(new ComparableStack(Items.snowball),			new FluidStack(125, Fluids.WATER));
 		recipes.put(new ComparableStack(Blocks.snow),				new FluidStack(500, Fluids.WATER));
 		recipes.put(new ComparableStack(Blocks.ice),				new FluidStack(1000, Fluids.WATER));
-		recipes.put(new ComparableStack(Blocks.packed_ice),			new FluidStack(1000, Fluids.WATER));
+		recipes.put(new ComparableStack(Blocks.packed_ice),			new FluidStack(2000, Fluids.WATER));
+		recipes.put(new ComparableStack(ModBlocks.dry_ice),			new FluidStack(1000, Fluids.CARBONDIOXIDE));
 		recipes.put(new ComparableStack(Items.ender_pearl),			new FluidStack(100, Fluids.ENDERJUICE));
 		recipes.put(new ComparableStack(ModItems.pellet_charged),	new FluidStack(4000, Fluids.HELIUM4));
 		recipes.put(new ComparableStack(ModBlocks.ore_oil_sand),	new FluidStack(100, Fluids.BITUMEN));
@@ -70,6 +70,11 @@ public class LiquefactionRecipes extends SerializableRecipe {
 		recipes.put(new ComparableStack(Blocks.tallgrass, 1, 1),	new FluidStack(100, Fluids.SEEDSLURRY));
 		recipes.put(new ComparableStack(Blocks.tallgrass, 1, 2),	new FluidStack(100, Fluids.SEEDSLURRY));
 		recipes.put(new ComparableStack(Blocks.vine),				new FluidStack(100, Fluids.SEEDSLURRY));
+		recipes.put(new ComparableStack(ModItems.flesh),			new FluidStack(100, Fluids.BLOOD));
+		recipes.put(new ComparableStack(ModItems.ingot_osmiridium),	new FluidStack(24000, Fluids.ETHANOL));
+		//recipes.put(new ComparableStack(ModItems.solid_fuel_bf),	new FluidStack(250, Fluids.BALEFIRE));
+		
+		//TODO: more recipes as the crack oil derivatives are added
 	}
 	
 	public static FluidStack getOutput(ItemStack stack) {

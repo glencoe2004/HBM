@@ -81,9 +81,13 @@ public abstract class SerializableRecipe {
 		recipeHandlers.add(new AssemblerRecipes());
 		//AFTER Assembler
 		recipeHandlers.add(new AnvilRecipes());
+		recipeHandlers.add(new AlkylationRecipes());
+		recipeHandlers.add(new VacuumCircuitRecipes());
 		recipeHandlers.add(new PedestalRecipes());
-		
+
 		recipeHandlers.add(new MatDistribution());
+		recipeHandlers.add(new CryoRecipes());
+
 		recipeHandlers.add(new CustomMachineRecipes());
 		//AFTER MatDistribution
 		recipeHandlers.add(new ArcFurnaceRecipes());

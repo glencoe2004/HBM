@@ -8,7 +8,9 @@ public class BlockEnums {
 		HEMATITE,
 		MALACHITE,
 		LIMESTONE,
-		BAUXITE
+		BAUXITE,
+		CONGLOMERATE,
+		CALCIUM,
 	}
 
 	public static enum EnumMeteorType {
@@ -26,7 +28,8 @@ public class BlockEnums {
 
 	public static enum EnumStalagmiteType {
 		SULFUR,
-		ASBESTOS
+		ASBESTOS,
+		FLESH
 	}
 
 	public static enum EnumCMMaterials {

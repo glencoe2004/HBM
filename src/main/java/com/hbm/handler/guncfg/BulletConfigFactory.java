@@ -2,6 +2,7 @@ package com.hbm.handler.guncfg;
 
 import java.util.List;
 
+import com.hbm.entity.grenade.EntityGrenadeFlare;
 import com.hbm.entity.projectile.EntityBulletBaseNT;
 import com.hbm.entity.projectile.EntityBulletBaseNT.*;
 import com.hbm.explosion.ExplosionNukeSmall;
@@ -18,6 +19,7 @@ import com.hbm.util.BobMathUtil;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntitySquid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -47,6 +49,7 @@ public class BulletConfigFactory {
 		bullet.ricochetAngle = 5;
 		bullet.HBRC = 2;
 		bullet.LBRC = 95;
+		bullet.headshotMult = 1.25F;
 		bullet.bounceMod = 0.8;
 		bullet.doesPenetrate = true;
 		bullet.doesBreakGlass = true;
@@ -262,6 +265,78 @@ public class BulletConfigFactory {
 					PacketThreading.createAllAroundThreadedPacket(new AuxParticlePacketNT(haze, bullet.posX, bullet.posY, bullet.posZ), new TargetPoint(bullet.dimension, bullet.posX, bullet.posY, bullet.posZ, 150));
 				}
 			}
+		};
+
+		return impact;
+	}
+	public static IBulletImpactBehaviorNT getFlashbangEffect(final int radius, final int duration, boolean isSuper) {
+
+		IBulletImpactBehaviorNT impact = new IBulletImpactBehaviorNT() {
+
+			@Override
+			public void behaveBlockHit(EntityBulletBaseNT bullet, int x, int y, int z, int sideHit) {
+				bullet.worldObj.playSoundEffect(bullet.posX, bullet.posY, bullet.posZ, "hbm:weapon.flashbang", 1F,1F);
+
+				List<Entity> hit = bullet.worldObj.getEntitiesWithinAABBExcludingEntity(bullet, AxisAlignedBB.getBoundingBox(bullet.posX - radius, bullet.posY - radius, bullet.posZ - radius, bullet.posX + radius, bullet.posY + radius, bullet.posZ + radius));
+
+				EntityGrenadeFlare flash = new EntityGrenadeFlare(bullet.worldObj, bullet.posX, bullet.posY, bullet.posZ );
+				bullet.worldObj.spawnEntityInWorld(flash);
+
+				for(Entity e : hit) {
+
+					if(!Library.isObstructed(bullet.worldObj, bullet.posX, bullet.posY, bullet.posZ, e.posX, e.posY + e.getEyeHeight(), e.posZ)) {
+
+						if(e instanceof EntityLivingBase) {
+							EntityLivingBase entity = (EntityLivingBase) e;
+							if (ArmorRegistry.hasAllProtection(entity, 3, HazardClass.LIGHT) && !isSuper) {
+								continue;
+							}
+							PotionEffect eff = new PotionEffect(HbmPotion.flashbang.id, duration, 0, true);
+							((EntityLivingBase)e).addPotionEffect(eff);
+						}
+					}
+				}
+			}
+
+		};
+
+		return impact;
+	}
+
+	public static IBulletImpactBehaviorNT getButterBulletImpactBehaviorNT(final int radius, final int duration, boolean isSuper) {
+
+		IBulletImpactBehaviorNT impact = new IBulletImpactBehaviorNT() {
+
+
+			@Override
+			public void behaveBlockHit(EntityBulletBaseNT bullet, int x, int y, int z, int sideHit) {
+				bullet.worldObj.playSoundEffect(bullet.posX, bullet.posY, bullet.posZ, "hbm:weapon.splort", 1F,1F);
+
+				List<Entity> hit = bullet.worldObj.getEntitiesWithinAABBExcludingEntity(bullet, AxisAlignedBB.getBoundingBox(bullet.posX - radius, bullet.posY - radius, bullet.posZ - radius, bullet.posX + radius, bullet.posY + radius, bullet.posZ + radius));
+
+
+				for(Entity e : hit) {
+
+					if(!Library.isObstructed(bullet.worldObj, bullet.posX, bullet.posY, bullet.posZ, e.posX, e.posY + e.getEyeHeight(), e.posZ)) {
+
+						if(e instanceof EntityLivingBase) {
+							EntityLivingBase entity = (EntityLivingBase) e;
+							PotionEffect eff = new PotionEffect(HbmPotion.slippery.id, duration, 0, true);
+							((EntityLivingBase)e).addPotionEffect(eff);
+
+							if(e instanceof EntitySquid) {
+								double ex = e.posX;
+								double ey = e.posY;
+								double ez = e.posZ;
+
+								e.worldObj.createExplosion(bullet, ex, ey, ez, 2, e.addedToChunk);
+
+							}
+						}
+					}
+				}
+			}
+
 		};
 
 		return impact;

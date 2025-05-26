@@ -12,6 +12,9 @@ import com.hbm.items.ModItems;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.model.ModelBullet;
+import com.hbm.render.util.BeamPronter;
+import com.hbm.render.util.BeamPronter.EnumBeamType;
+import com.hbm.render.util.BeamPronter.EnumWaveType;
 import com.hbm.render.util.RenderSparks;
 import com.hbm.util.Tuple.Pair;
 
@@ -27,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 
-@Deprecated
 public class RenderBullet extends Render {
 
 	private ModelBullet bullet;
@@ -58,7 +60,7 @@ public class RenderBullet extends Render {
 			case BulletConfiguration.STYLE_NORMAL: renderBullet(trail); break;
 			case BulletConfiguration.STYLE_PISTOL: renderPistol(trail); break;
 			case BulletConfiguration.STYLE_BOLT: renderDart(trail, bullet.getEntityId()); break;
-			case BulletConfiguration.STYLE_FLECHETTE: renderFlechette(); break;
+			case BulletConfiguration.STYLE_FLECHETTE: renderFlechette();; break;
 			case BulletConfiguration.STYLE_FOLLY: renderBullet(trail); break;
 			case BulletConfiguration.STYLE_PELLET: renderBuckshot(); break;
 			case BulletConfiguration.STYLE_ROCKET: renderRocket(trail); break;
@@ -69,6 +71,8 @@ public class RenderBullet extends Render {
 			case BulletConfiguration.STYLE_BLADE: renderBlade(); break;
 			case BulletConfiguration.STYLE_TAU: renderTau(bullet, trail, f1); break;
 			case BulletConfiguration.STYLE_LEADBURSTER: renderLeadburster(bullet, f1); break;
+			case BulletConfiguration.STYLE_WAR: renderTracerV2(); break;
+
 			default: renderBullet(trail); break;
 		}
 		
@@ -125,14 +129,46 @@ public class RenderBullet extends Render {
 	
 	private void renderRocket(int type) {
 		
-		GL11.glScaled(0.5, 0.5, 0.5);
-		GL11.glRotated(90, 0, 0, 1);
-		GL11.glRotated(90, 0, 1, 0);
+		switch(type) {
+		case 0:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocket.png")); break;
+		case 1:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketHE.png")); break;
+		case 2:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketIncendiary.png")); break;
+		case 3:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketShrapnel.png")); break;
+		case 4:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketEMP.png")); break;
+		case 5:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketGlare.png")); break;
+		case 6:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketSleek.png")); break;
+		case 7:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketNuclear.png")); break;
+		case 9:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketPhosphorus.png")); break;
+		case 10:
+			bindTexture(new ResourceLocation(RefStrings.MODID + ":textures/entity/ModelRocketCanister.png")); break;
+		}
+		
+		if(type == 8) {
+			bindTexture(ResourceManager.rpc_tex);
+			GL11.glScalef(0.25F, 0.25F, 0.25F);
+			GL11.glRotatef(180, 1, 0, 0);
+			ResourceManager.rpc.renderAll();
+			return;
+		} else {
+			
+			GL11.glScaled(0.5, 0.5, 0.5);
+			GL11.glRotated(90, 0, 0, 1);
+			GL11.glRotated(90, 0, 1, 0);
 
-		GL11.glShadeModel(GL11.GL_SMOOTH);
-		bindTexture(ResourceManager.rocket_tex);
-		ResourceManager.projectiles.renderPart("Rocket");
-		GL11.glShadeModel(GL11.GL_FLAT);
+			GL11.glShadeModel(GL11.GL_SMOOTH);
+			bindTexture(ResourceManager.rocket_tex);
+			ResourceManager.projectiles.renderPart("Rocket");
+			GL11.glShadeModel(GL11.GL_FLAT);
+		}
 	}
 	
 	private void renderGrenade(int type) {
@@ -159,9 +195,9 @@ public class RenderBullet extends Render {
 		switch(type) {
 		case 0:
 			bindTexture(ResourceManager.tom_flame_tex);
-			ResourceManager.sphere_uv.renderAll();
+			ResourceManager.sphere_uv_anim.renderAll();
 			GL11.glScalef(0.3F, 0.3F, 0.3F);
-			ResourceManager.sphere_uv.renderAll();
+			ResourceManager.sphere_uv_anim.renderAll();
 			GL11.glScalef(1F/0.3F, 1F/0.3F, 1F/0.3F);
 			for(int i = 0; i < 5; i++)
 				RenderSparks.renderSpark((int) (System.currentTimeMillis() / 100 + 100 * i), 0, 0, 0, 0.5F, 2, 2, 0x8080FF, 0xFFFFFF);
@@ -213,6 +249,16 @@ public class RenderBullet extends Render {
 		GL11.glShadeModel(GL11.GL_SMOOTH);
 		bindTexture(ResourceManager.flechette_tex);
 		ResourceManager.projectiles.renderPart("Flechette");
+		GL11.glShadeModel(GL11.GL_FLAT);
+	}
+	private void renderTracerV2() {
+		
+		GL11.glScaled(0.5, 0.5, 0.5);
+		GL11.glRotated(90, 0, 0, 1);
+		GL11.glRotated(90, 0, 1, 0);
+		
+		GL11.glShadeModel(GL11.GL_SMOOTH);
+		BeamPronter.prontBeam(Vec3.createVectorHelper(0, 5, 0), EnumWaveType.SPIRAL, EnumBeamType.SOLID, 0xFF9000, 0xFF9000, 0, 1, 0F, 6, (float)0.2 * 0.2F, 256);
 		GL11.glShadeModel(GL11.GL_FLAT);
 	}
 	

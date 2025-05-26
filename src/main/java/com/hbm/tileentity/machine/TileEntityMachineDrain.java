@@ -6,13 +6,12 @@ import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTank;
 import com.hbm.inventory.fluid.trait.FT_Flammable;
 import com.hbm.inventory.fluid.trait.FT_Polluting;
+import com.hbm.inventory.fluid.trait.FT_Gaseous;
 import com.hbm.inventory.fluid.trait.FluidTrait.FluidReleaseType;
 import com.hbm.inventory.fluid.trait.FluidTraitSimple.FT_Amat;
-import com.hbm.inventory.fluid.trait.FluidTraitSimple.FT_Gaseous;
 import com.hbm.inventory.fluid.trait.FluidTraitSimple.FT_Liquid;
 import com.hbm.inventory.fluid.trait.FluidTraitSimple.FT_Viscous;
 import com.hbm.main.MainRegistry;
-import com.hbm.tileentity.IBufPacketReceiver;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.TileEntityLoadedBase;
 import com.hbm.util.fauxpointtwelve.DirPos;
@@ -26,9 +25,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class TileEntityMachineDrain extends TileEntityLoadedBase implements IFluidStandardReceiver, IBufPacketReceiver, IFluidCopiable {
+public class TileEntityMachineDrain extends TileEntityLoadedBase implements IFluidStandardReceiver, IFluidCopiable {
 
 	public FluidTank tank;
 
@@ -54,7 +54,9 @@ public class TileEntityMachineDrain extends TileEntityLoadedBase implements IFlu
 				}
 				int toSpill = Math.max(tank.getFill() / 2, 1);
 				tank.setFill(tank.getFill() - toSpill);
+
 				FT_Polluting.pollute(worldObj, xCoord, yCoord, zCoord, tank.getTankType(), FluidReleaseType.SPILL, toSpill);
+				FT_Gaseous.release(worldObj, tank.getTankType(), toSpill);
 
 				if(toSpill >= 100 && worldObj.rand.nextInt(20) == 0 && tank.getTankType().hasTrait(FT_Liquid.class) && tank.getTankType().hasTrait(FT_Viscous.class) && tank.getTankType().hasTrait(FT_Flammable.class)) {
 					ForgeDirection dir = ForgeDirection.getOrientation(this.getBlockMetadata() - 10);
@@ -62,7 +64,7 @@ public class TileEntityMachineDrain extends TileEntityLoadedBase implements IFlu
 					Vec3 end = start.addVector(worldObj.rand.nextGaussian() * 5, -25, worldObj.rand.nextGaussian() * 5);
 					MovingObjectPosition mop = worldObj.func_147447_a(start, end, false, true, false);
 
-					if(mop != null && mop.typeOfHit == mop.typeOfHit.BLOCK && mop.sideHit == 1) {
+					if(mop != null && mop.typeOfHit == MovingObjectType.BLOCK && mop.sideHit == 1) {
 						Block block = worldObj.getBlock(mop.blockX, mop.blockY + 1, mop.blockZ);
 						if(!block.getMaterial().isLiquid() && block.isReplaceable(worldObj, mop.blockX, mop.blockY + 1, mop.blockZ) && ModBlocks.oil_spill.canPlaceBlockAt(worldObj, mop.blockX, mop.blockY + 1, mop.blockZ)) {
 							worldObj.setBlock(mop.blockX, mop.blockY + 1, mop.blockZ, ModBlocks.oil_spill);
@@ -77,12 +79,13 @@ public class TileEntityMachineDrain extends TileEntityLoadedBase implements IFlu
 				ForgeDirection dir = ForgeDirection.getOrientation(this.getBlockMetadata() - 10);
 
 				NBTTagCompound data = new NBTTagCompound();
+				data.setFloat("lift", 0.5F);
+				data.setFloat("base", 0.375F);
+				data.setFloat("max", 3F);
+				data.setInteger("life", 100 + worldObj.rand.nextInt(50));
+				
 				if(tank.getTankType().hasTrait(FT_Gaseous.class)) {
 					data.setString("type", "tower");
-					data.setFloat("lift", 0.5F);
-					data.setFloat("base", 0.375F);
-					data.setFloat("max", 3F);
-					data.setInteger("life", 100 + worldObj.rand.nextInt(50));
 				} else {
 					data.setString("type", "splash");
 				}

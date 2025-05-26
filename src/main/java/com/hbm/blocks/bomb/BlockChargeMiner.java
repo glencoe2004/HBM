@@ -42,4 +42,5 @@ public class BlockChargeMiner extends BlockChargeBase {
 		list.add(EnumChatFormatting.BLUE + "Will drop all blocks.");
 		list.add(EnumChatFormatting.BLUE + "Does not do damage.");
 	}
+
 }

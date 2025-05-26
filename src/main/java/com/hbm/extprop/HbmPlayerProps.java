@@ -44,11 +44,17 @@ public class HbmPlayerProps implements IExtendedEntityProperties {
 	public float shield = 0;
 	public float maxShield = 0;
 	public int lastDamage = 0;
+	public int nitanCount = 0;
+	public int nitanHealth = nitanCount*10;
 	public static final float shieldCap = 100;
 
 	public int reputation;
 
 	public boolean isOnLadder = false;
+
+	public boolean hasWarped = false;
+
+	public int lastDimension = 0;
 
 	public HbmPlayerProps(EntityPlayer player) {
 		this.player = player;
@@ -214,11 +220,14 @@ public class HbmPlayerProps implements IExtendedEntityProperties {
 		props.setBoolean("hasReceivedBook", hasReceivedBook);
 		props.setFloat("shield", shield);
 		props.setFloat("maxShield", maxShield);
+		props.setFloat("nitan", nitanCount);
 		props.setBoolean("enableBackpack", enableBackpack);
 		props.setBoolean("enableMagnet", enableMagnet);
 		props.setBoolean("enableHUD", enableHUD);
 		props.setInteger("reputation", reputation);
 		props.setBoolean("isOnLadder", isOnLadder);
+		props.setBoolean("hasWarped", hasWarped);
+		props.setInteger("lastDimension", lastDimension);
 
 		nbt.setTag("HbmPlayerProps", props);
 	}
@@ -232,12 +241,15 @@ public class HbmPlayerProps implements IExtendedEntityProperties {
 		if(props != null) {
 			this.hasReceivedBook = props.getBoolean("hasReceivedBook");
 			this.shield = props.getFloat("shield");
+			this.nitanCount = props.getInteger("nitan");
 			this.maxShield = props.getFloat("maxShield");
 			this.enableBackpack = props.getBoolean("enableBackpack");
 			this.enableMagnet = props.getBoolean("enableMagnet");
 			this.enableHUD = props.getBoolean("enableHUD");
 			this.reputation = props.getInteger("reputation");
 			this.isOnLadder = props.getBoolean("isOnLadder");
+			this.hasWarped = props.getBoolean("hasWarped");
+			this.lastDimension = props.getInteger("lastDimension");
 		}
 	}
 }

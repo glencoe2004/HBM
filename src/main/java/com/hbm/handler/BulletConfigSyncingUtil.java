@@ -33,6 +33,9 @@ public class BulletConfigSyncingUtil {
 	
 	public static int UFO_ROCKET = i++;
 
+	public static int WORLDWAR = i++;
+
+	
 	public static void loadConfigsForSync() {
 
 		configSet.put(CRYO_NORMAL, GunEnergyFactory.getCryoConfig());
@@ -51,7 +54,7 @@ public class BulletConfigSyncingUtil {
 		configSet.put(MASKMAN_METEOR, GunNPCFactory.getMaskmanMeteor());
 		configSet.put(WORM_BOLT, GunNPCFactory.getWormBolt());
 		configSet.put(WORM_LASER, GunNPCFactory.getWormHeadBolt());
-		
+		configSet.put(WORLDWAR, GunNPCFactory.getBehemothBullet());
 		configSet.put(UFO_ROCKET, GunNPCFactory.getRocketUFOConfig());
 	}
 

@@ -6,12 +6,16 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.model.ModelBroadcaster;
+import com.hbm.render.model.ModelGeiger;
 import com.hbm.render.model.ModelRadio;
 import com.hbm.render.model.ModelSteelRoof;
+import com.hbm.tileentity.machine.TileEntityMachineGasDock;
+import com.hbm.tileentity.machine.TileEntityTransporterRocket;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
 
 public class RenderDecoBlock extends TileEntitySpecialRenderer {
@@ -20,15 +24,18 @@ public class RenderDecoBlock extends TileEntitySpecialRenderer {
 	private static final ResourceLocation texture6 = new ResourceLocation(RefStrings.MODID + ":" + "textures/models/ModelBroadcaster.png");
 	private static final ResourceLocation texture7 = new ResourceLocation(RefStrings.MODID + ":" + "textures/models/ModelRadio.png");
 	private static final ResourceLocation texture8 = new ResourceLocation(RefStrings.MODID + ":" + "textures/models/ModelRadioReceiver.png");
+	private static final ResourceLocation texture9 = new ResourceLocation(RefStrings.MODID + ":" + "textures/models/ModelGeiger.png");
 
 	private ModelSteelRoof model3;
 	private ModelBroadcaster model6;
 	private ModelRadio model7;
+	private ModelGeiger model8;
 
 	public RenderDecoBlock() {
 		this.model3 = new ModelSteelRoof();
 		this.model6 = new ModelBroadcaster();
 		this.model7 = new ModelRadio();
+		this.model8 = new ModelGeiger();
 	}
 
 	@Override
@@ -46,6 +53,16 @@ public class RenderDecoBlock extends TileEntitySpecialRenderer {
 		}
 		if(b == ModBlocks.broadcaster_pc) {
 			this.bindTexture(texture6);
+			switch(tileentity.getBlockMetadata())
+			{
+			case 4: GL11.glRotatef(90, 0F, 1F, 0F); break;
+			case 2: GL11.glRotatef(180, 0F, 1F, 0F); break;
+			case 5: GL11.glRotatef(270, 0F, 1F, 0F); break;
+			case 3: GL11.glRotatef(0, 0F, 1F, 0F); break;
+			}
+		}
+		if(b == ModBlocks.geiger) {
+			this.bindTexture(texture9);
 			switch(tileentity.getBlockMetadata())
 			{
 			case 4: GL11.glRotatef(90, 0F, 1F, 0F); break;
@@ -83,6 +100,7 @@ public class RenderDecoBlock extends TileEntitySpecialRenderer {
 		GL11.glPushMatrix();
 			if(b == ModBlocks.steel_roof) this.model3.renderModel(0.0625F);
 			if(b == ModBlocks.broadcaster_pc) this.model6.renderModel(0.0625F);
+			if(b== ModBlocks.geiger) this.model8.renderModel(0.0625F);
 			if(b == ModBlocks.radiobox) this.model7.renderModel(0.0625F, tileentity.getBlockMetadata() > 5 ? 160 : 20);
 			if(b == ModBlocks.radiorec) this.model6.renderModel(0.0625F);
 		GL11.glPopMatrix();
@@ -230,12 +248,32 @@ public class RenderDecoBlock extends TileEntitySpecialRenderer {
 			ResourceManager.sat_foeq.renderAll();
 		}
 
-		if(b == ModBlocks.sat_dock) {
+		if(b == ModBlocks.sat_dock || b == ModBlocks.gas_dock) {
 			GL11.glRotatef(180, 0F, 0F, 1F);
 			GL11.glTranslatef(0, -1.5F, 0);
 
 			bindTexture(ResourceManager.satdock_tex);
 			ResourceManager.satDock.renderAll();
+
+			if(b == ModBlocks.gas_dock) {
+				if(tileentity instanceof TileEntityMachineGasDock && ((TileEntityMachineGasDock)tileentity).launchTicks < 100) {
+					TileEntityMachineGasDock transporter = (TileEntityMachineGasDock) tileentity;
+					GL11.glPushMatrix();
+					{
+
+						GL11.glTranslatef(0.0F, 0.75F + MathHelper.clamp_float(transporter.launchTicks + (transporter.hasRocket ? -f : f), 0, 200), 0.0F);
+						GL11.glDisable(GL11.GL_CULL_FACE);
+
+						bindTexture(ResourceManager.minerRocket_tex);
+
+						ResourceManager.minerRocket.renderAll();
+
+						GL11.glEnable(GL11.GL_CULL_FACE);
+
+					}
+					GL11.glPopMatrix();
+				}
+			}
 		}
 
 		GL11.glPopMatrix();

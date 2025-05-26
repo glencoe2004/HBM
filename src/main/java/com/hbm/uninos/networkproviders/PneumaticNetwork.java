@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import com.hbm.tileentity.machine.TileEntityMachineAutocrafter;
 import com.hbm.tileentity.network.TileEntityPneumoTube;
 import com.hbm.uninos.NodeNet;
 import com.hbm.util.BobMathUtil;
@@ -101,7 +100,6 @@ public class PneumaticNetwork extends NodeNet {
 		int destSide = chosenReceiverEntry.getValue().getKey().getOpposite().ordinal();
 		int[] destSlotAccess = getSlotAccess(dest, destSide);
 		int itemsLeftToSend = ITEMS_PER_TRANSFER; // not actually individual items, but rather the total "mass", based on max stack size
-		int itemHardCap = dest instanceof TileEntityMachineAutocrafter ? 1 : ITEMS_PER_TRANSFER;
 		boolean didSomething = false;
 		
 		for(int sourceIndex : sourceSlotAccess) {
@@ -117,14 +115,11 @@ public class PneumaticNetwork extends NodeNet {
 			for(int destIndex : destSlotAccess) {
 				ItemStack destStack = dest.getStackInSlot(destIndex);
 				if(destStack == null) continue;
+				if(!dest.isItemValidForSlot(destIndex, sourceStack)) continue;
+				if(sidedDest != null && !sidedDest.canInsertItem(destIndex, sourceStack, destSide)) continue;
 				if(!ItemStackUtil.areStacksCompatible(sourceStack, destStack)) continue;
-				int toMove = BobMathUtil.min(sourceStack.stackSize, destStack.getMaxStackSize() - destStack.stackSize, dest.getInventoryStackLimit() - destStack.stackSize, itemsLeftToSend / proportionalValue, itemHardCap);
+				int toMove = BobMathUtil.min(sourceStack.stackSize, destStack.getMaxStackSize() - destStack.stackSize, dest.getInventoryStackLimit() - destStack.stackSize, itemsLeftToSend / proportionalValue);
 				if(toMove <= 0) continue;
-				
-				ItemStack checkStack = destStack.copy();
-				checkStack.stackSize += toMove;
-				if(!dest.isItemValidForSlot(destIndex, checkStack)) continue;
-				if(sidedDest != null && !sidedDest.canInsertItem(destIndex, checkStack, destSide)) continue;
 				
 				sourceStack.stackSize -= toMove;
 				if(sourceStack.stackSize <= 0) source.setInventorySlotContents(sourceIndex, null);
@@ -137,13 +132,10 @@ public class PneumaticNetwork extends NodeNet {
 			// if there's stuff left to send, occupy empty slots
 			if(itemsLeftToSend > 0 && sourceStack.stackSize > 0) for(int destIndex : destSlotAccess) {
 				if(dest.getStackInSlot(destIndex) != null) continue;
-				int toMove = BobMathUtil.min(sourceStack.stackSize, dest.getInventoryStackLimit(), itemsLeftToSend / proportionalValue, itemHardCap);
+				if(!dest.isItemValidForSlot(destIndex, sourceStack)) continue;
+				if(sidedDest != null && !sidedDest.canInsertItem(destIndex, sourceStack, destSide)) continue;
+				int toMove = BobMathUtil.min(sourceStack.stackSize, dest.getInventoryStackLimit(), itemsLeftToSend / proportionalValue);
 				if(toMove <= 0) continue;
-				
-				ItemStack checkStack = sourceStack.copy();
-				checkStack.stackSize = toMove;
-				if(!dest.isItemValidForSlot(destIndex, checkStack)) continue;
-				if(sidedDest != null && !sidedDest.canInsertItem(destIndex, checkStack, destSide)) continue;
 
 				ItemStack newStack = sourceStack.copy();
 				newStack.stackSize = toMove;
@@ -152,7 +144,7 @@ public class PneumaticNetwork extends NodeNet {
 				dest.setInventorySlotContents(destIndex, newStack);
 				itemsLeftToSend -= toMove * proportionalValue;
 				didSomething = true;
-				if(itemsLeftToSend <= 0) break;
+				break;
 			}
 			
 			if(itemsLeftToSend <= 0) break;

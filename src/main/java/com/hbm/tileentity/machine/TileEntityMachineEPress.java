@@ -91,7 +91,7 @@ public class TileEntityMachineEPress extends TileEntityMachineBase implements IE
 					} else if(canProcess) {
 						this.press += stampSpeed;
 
-						if(this.press >= this.maxPress) {
+						if(this.press >= maxPress) {
 							this.worldObj.playSoundEffect(this.xCoord, this.yCoord, this.zCoord, "hbm:block.pressOperate", getVolume(1.5F), 1.0F);
 							ItemStack output = PressRecipes.getOutput(slots[2], slots[1]);
 							if(slots[3] == null) {
@@ -275,7 +275,7 @@ public class TileEntityMachineEPress extends TileEntityMachineBase implements IE
 	public void provideInfo(UpgradeType type, int level, List<String> info, boolean extendedInfo) {
 		info.add(IUpgradeInfoProvider.getStandardLabel(ModBlocks.machine_epress));
 		if(type == UpgradeType.SPEED) {
-			info.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey(this.KEY_DELAY, "-" + (50 * level / 3) + "%"));
+			info.add(EnumChatFormatting.GREEN + I18nUtil.resolveKey(KEY_DELAY, "-" + (50 * level / 3) + "%"));
 		}
 	}
 

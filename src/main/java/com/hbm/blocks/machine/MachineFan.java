@@ -3,11 +3,19 @@ package com.hbm.blocks.machine;
 import java.util.List;
 
 import com.hbm.blocks.ITooltipProvider;
+import com.hbm.dim.trait.CBT_Atmosphere;
+import com.hbm.handler.atmosphere.ChunkAtmosphereManager;
+import com.hbm.handler.atmosphere.IBlockSealable;
+import com.hbm.packet.PacketDispatcher;
+import com.hbm.packet.toclient.BufPacket;
+import com.hbm.tileentity.IBufPacketReceiver;
 
 import api.hbm.block.IBlowable;
 import api.hbm.block.IToolable;
+import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockPistonBase;
@@ -22,7 +30,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class MachineFan extends BlockContainer implements IToolable, ITooltipProvider {
+public class MachineFan extends BlockContainer implements IToolable, ITooltipProvider, IBlockSealable {
 
 	public MachineFan() {
 		super(Material.iron);
@@ -65,10 +73,12 @@ public class MachineFan extends BlockContainer implements IToolable, ITooltipPro
 		return false;
 	}
 	
-	public static class TileEntityFan extends TileEntity {
+	public static class TileEntityFan extends TileEntity implements IBufPacketReceiver {
 
 		public float spin;
 		public float prevSpin;
+
+		private boolean hasAtmosphere;
 
 		@Override
 		public void updateEntity() {
@@ -76,42 +86,56 @@ public class MachineFan extends BlockContainer implements IToolable, ITooltipPro
 			this.prevSpin = this.spin;
 			
 			if(worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
-				ForgeDirection dir = ForgeDirection.getOrientation(this.getBlockMetadata());
-				
-				int range = 10;
-				int effRange = 0;
-				double push = 0.1;
-				
-				for(int i = 1; i <= range; i++) {
-					Block block = worldObj.getBlock(xCoord + dir.offsetX * i, yCoord + dir.offsetY * i, zCoord + dir.offsetZ * i);
-					boolean blowable = block instanceof IBlowable;
-					
-					if(block.isNormalCube() || blowable) {
-						if(!worldObj.isRemote && blowable)
-							((IBlowable) block).applyFan(worldObj, xCoord + dir.offsetX * i, yCoord + dir.offsetY * i, zCoord + dir.offsetZ * i, dir, i);
-						
-						break;
+				if(!worldObj.isRemote) {
+					boolean prevHasAtmosphere = hasAtmosphere;
+
+					CBT_Atmosphere atmosphere = ChunkAtmosphereManager.proxy.getAtmosphere(worldObj, xCoord, yCoord, zCoord);
+					hasAtmosphere = atmosphere != null&& atmosphere.getPressure() > 0.01D;
+
+					// update when changing and every 3 seconds
+					if(prevHasAtmosphere != hasAtmosphere || worldObj.getTotalWorldTime() % 60 == 0) {
+						PacketDispatcher.wrapper.sendToAllAround(new BufPacket(xCoord, yCoord, zCoord, this), new TargetPoint(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, 150));
 					}
-					
-					effRange = i;
 				}
 
-				int x = dir.offsetX * effRange;
-				int y = dir.offsetY * effRange;
-				int z = dir.offsetZ * effRange;
-				
-				List<Entity> affected = worldObj.getEntitiesWithinAABB(Entity.class, AxisAlignedBB.getBoundingBox(xCoord + 0.5 + Math.min(x, 0), yCoord + 0.5 + Math.min(y, 0), zCoord + 0.5 + Math.min(z, 0), xCoord + 0.5 + Math.max(x, 0), yCoord + 0.5 + Math.max(y, 0), zCoord + 0.5 + Math.max(z, 0)).expand(0.5, 0.5, 0.5));
-				
-				for(Entity e : affected) {
+				if(hasAtmosphere) {
+					ForgeDirection dir = ForgeDirection.getOrientation(this.getBlockMetadata());
 					
-					e.motionX += dir.offsetX * push;
-					e.motionY += dir.offsetY * push;
-					e.motionZ += dir.offsetZ * push;
-				}
-				
-				if(worldObj.isRemote && worldObj.rand.nextInt(30) == 0) {
-					double speed = 0.2;
-					worldObj.spawnParticle("cloud", xCoord + 0.5 + dir.offsetX * 0.5, yCoord + 0.5 + dir.offsetY * 0.5, zCoord + 0.5 + dir.offsetZ * 0.5, dir.offsetX * speed, dir.offsetY * speed, dir.offsetZ * speed);
+					int range = 10;
+					int effRange = 0;
+					double push = 0.1;
+					
+					for(int i = 1; i <= range; i++) {
+						Block block = worldObj.getBlock(xCoord + dir.offsetX * i, yCoord + dir.offsetY * i, zCoord + dir.offsetZ * i);
+						boolean blowable = block instanceof IBlowable;
+						
+						if(block.isNormalCube() || blowable) {
+							if(!worldObj.isRemote && blowable)
+								((IBlowable) block).applyFan(worldObj, xCoord + dir.offsetX * i, yCoord + dir.offsetY * i, zCoord + dir.offsetZ * i, dir, i);
+							
+							break;
+						}
+						
+						effRange = i;
+					}
+	
+					int x = dir.offsetX * effRange;
+					int y = dir.offsetY * effRange;
+					int z = dir.offsetZ * effRange;
+					
+					List<Entity> affected = worldObj.getEntitiesWithinAABB(Entity.class, AxisAlignedBB.getBoundingBox(xCoord + 0.5 + Math.min(x, 0), yCoord + 0.5 + Math.min(y, 0), zCoord + 0.5 + Math.min(z, 0), xCoord + 0.5 + Math.max(x, 0), yCoord + 0.5 + Math.max(y, 0), zCoord + 0.5 + Math.max(z, 0)).expand(0.5, 0.5, 0.5));
+					
+					for(Entity e : affected) {
+						
+						e.motionX += dir.offsetX * push;
+						e.motionY += dir.offsetY * push;
+						e.motionZ += dir.offsetZ * push;
+					}
+					
+					if(worldObj.isRemote && worldObj.rand.nextInt(30) == 0) {
+						double speed = 0.2;
+						worldObj.spawnParticle("cloud", xCoord + 0.5 + dir.offsetX * 0.5, yCoord + 0.5 + dir.offsetY * 0.5, zCoord + 0.5 + dir.offsetZ * 0.5, dir.offsetX * speed, dir.offsetY * speed, dir.offsetZ * speed);
+					}
 				}
 				
 				this.spin += 30;
@@ -127,6 +151,16 @@ public class MachineFan extends BlockContainer implements IToolable, ITooltipPro
 		@SideOnly(Side.CLIENT)
 		public double getMaxRenderDistanceSquared() {
 			return 65536.0D;
+		}
+
+		@Override
+		public void serialize(ByteBuf buf) {
+			buf.writeBoolean(hasAtmosphere);
+		}
+
+		@Override
+		public void deserialize(ByteBuf buf) {
+			hasAtmosphere = buf.readBoolean();
 		}
 	}
 
@@ -148,5 +182,10 @@ public class MachineFan extends BlockContainer implements IToolable, ITooltipPro
 	@Override
 	public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean ext) {
 		this.addStandardInfo(stack, player, list, ext);
+	}
+
+	@Override
+	public boolean isSealed(World world, int x, int y, int z) {
+		return false;
 	}
 }

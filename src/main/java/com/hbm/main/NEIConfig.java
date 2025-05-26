@@ -10,10 +10,13 @@ import com.hbm.blocks.generic.BlockPlushie.TileEntityPlushie;
 import com.hbm.config.ClientConfig;
 import com.hbm.config.CustomMachineConfigJSON;
 import com.hbm.handler.nei.CustomMachineHandler;
-import com.hbm.items.ItemEnums.EnumIngotMetal;
 import com.hbm.items.ItemEnums.EnumSecretType;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemBattery;
+import com.hbm.items.special.ItemBedrockOreNew;
+import com.hbm.items.special.ItemBedrockOreNew.BedrockOreGrade;
+import com.hbm.items.special.ItemBedrockOreNew.CelestialBedrockOre;
+import com.hbm.items.special.ItemBedrockOreNew.CelestialBedrockOreType;
 import com.hbm.items.weapon.sedna.ItemGunBaseNT;
 import com.hbm.items.weapon.sedna.factory.GunFactory.EnumAmmoSecret;
 import com.hbm.lib.RefStrings;
@@ -43,8 +46,6 @@ public class NEIConfig implements IConfigureNEI {
 			for(int i = 0; i < EnumAmmoSecret.values().length; i++) API.hideItem(new ItemStack(ModItems.ammo_secret, 1, i));
 			for(int i = 0; i < EnumSecretType.values().length; i++) API.hideItem(new ItemStack(ModItems.item_secret, 1, i));
 		}
-		
-		for(int i = 0; i < EnumIngotMetal.values().length; i++) API.hideItem(new ItemStack(ModItems.ingot_metal, 1, i));
 
 		//Some things are even beyond my control...or are they?
 		API.hideItem(ItemBattery.getEmptyBattery(ModItems.memory));
@@ -85,12 +86,22 @@ public class NEIConfig implements IConfigureNEI {
 		API.hideItem(new ItemStack(ModBlocks.spotlight_halogen_off));
 		API.hideItem(new ItemStack(ModBlocks.spotlight_beam));
 
+		API.hideItem(new ItemStack(ModItems.rocket_custom));
+		API.hideItem(new ItemStack(ModBlocks.orbital_station));
+
 		API.hideItem(new ItemStack(ModBlocks.conveyor));
 		API.hideItem(new ItemStack(ModBlocks.conveyor_chute));
 		API.hideItem(new ItemStack(ModBlocks.conveyor_lift));
 		API.hideItem(new ItemStack(ModBlocks.conveyor_express));
 		API.hideItem(new ItemStack(ModBlocks.conveyor_double));
 		API.hideItem(new ItemStack(ModBlocks.conveyor_triple));
+
+		for(BedrockOreGrade grade : BedrockOreGrade.values()) {
+			if(grade == BedrockOreGrade.BASE) continue;
+			for(CelestialBedrockOreType type : CelestialBedrockOre.getAllTypes()) {
+				API.hideItem(ItemBedrockOreNew.make(grade, type));
+			}
+		}
 
 		API.registerHighlightIdentifier(ModBlocks.plushie, new IHighlightHandler() {
 			@Override public ItemStack identifyHighlight(World world, EntityPlayer player, MovingObjectPosition mop) {

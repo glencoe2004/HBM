@@ -47,10 +47,13 @@ public class ItemBobmazonPacket implements IMessage {
 		
 		@Override
 		public IMessage onMessage(ItemBobmazonPacket m, MessageContext ctx) {
-			
 			EntityPlayerMP p = ctx.getServerHandler().playerEntity;
 			World world = p.worldObj;
-
+			if(world.provider.dimensionId != 0)
+			{
+				p.addChatMessage(new ChatComponentText("[BOBMAZON] Out Of Range!"));
+				return null;
+			}
 			Offer offer = null;
 			if(p.getHeldItem() != null && p.getHeldItem().getItem() == ModItems.bobmazon) offer = BobmazonOfferFactory.standard.get(m.offer);
 			if(p.getHeldItem() != null && p.getHeldItem().getItem() == ModItems.bobmazon_hidden) offer = BobmazonOfferFactory.special.get(m.offer);
@@ -62,11 +65,11 @@ public class ItemBobmazonPacket implements IMessage {
 				p.motionY = 2.0D;
 				return null;
 			}
+
 			
 			ItemStack stack = offer.offer;
 			
 			Achievement req = offer.requirement.achievement;
-			
 			if(req != null && p.func_147099_x().hasAchievementUnlocked(req) || p.capabilities.isCreativeMode) {
 				
 				if(countCaps(p) >= offer.cost || p.capabilities.isCreativeMode) {

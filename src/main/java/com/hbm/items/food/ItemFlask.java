@@ -4,6 +4,8 @@ import java.util.Locale;
 
 import com.hbm.extprop.HbmPlayerProps;
 import com.hbm.items.ItemEnumMulti;
+import com.hbm.lib.ModDamageSource;
+import com.hbm.potion.HbmPotion;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -11,13 +13,16 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
 public class ItemFlask extends ItemEnumMulti {
 	
-	public static enum EnumInfusion {
-		SHIELD
+	public static enum EnumInfusion {	
+		SHIELD,
+		NITAN 
 	}
 
 	public ItemFlask() {
@@ -38,7 +43,7 @@ public class ItemFlask extends ItemEnumMulti {
 
 	@Override
 	public ItemStack onEaten(ItemStack stack, World world, EntityPlayer player) {
-
+		HbmPlayerProps props = HbmPlayerProps.getData(player);
 		if(!player.capabilities.isCreativeMode) {
 			--stack.stackSize;
 		}
@@ -48,10 +53,17 @@ public class ItemFlask extends ItemEnumMulti {
 			
 		if(stack.getItemDamage() == EnumInfusion.SHIELD.ordinal()) {
 			float infusion = 5F;
-			HbmPlayerProps props = HbmPlayerProps.getData(player);
 			props.maxShield = Math.min(props.shieldCap, props.maxShield + infusion);
 			props.shield = Math.min(props.shield + infusion, props.getEffectiveMaxShield());
 		}
+		
+		if(stack.getItemDamage() == EnumInfusion.NITAN.ordinal()) {
+			props.nitanCount = props.nitanCount + 1;
+			player.addPotionEffect(new PotionEffect(HbmPotion.nitan.id, 60 * 20 * 3, 0));
+			player.addPotionEffect(new PotionEffect(Potion.resistance.id, 60 * 20 * 3, 3));
+			
+		}
+		
 		
 		return stack;
 	}

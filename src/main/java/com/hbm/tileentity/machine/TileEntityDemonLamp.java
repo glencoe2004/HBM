@@ -2,6 +2,8 @@ package com.hbm.tileentity.machine;
 
 import java.util.List;
 
+import com.hbm.config.RadiationConfig;
+import com.hbm.hazard.type.HazardTypeNeutron;
 import com.hbm.util.ContaminationUtil;
 import com.hbm.util.ContaminationUtil.ContaminationType;
 import com.hbm.util.ContaminationUtil.HazardType;
@@ -9,6 +11,9 @@ import com.hbm.util.ContaminationUtil.HazardType;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -29,6 +34,7 @@ public class TileEntityDemonLamp extends TileEntity {
 		
 		float rads = 100000F;
 		double range = 25D;
+		
 		
 		List<EntityLivingBase> entities = world.getEntitiesWithinAABB(EntityLivingBase.class, AxisAlignedBB.getBoundingBox(x + 0.5, y + 0.5, z + 0.5, x + 0.5, y + 0.5, z + 0.5).expand(range, range, range));
 		
@@ -57,6 +63,16 @@ public class TileEntityDemonLamp extends TileEntity {
 			eRads /= (float)(len * len);
 			
 			ContaminationUtil.contaminate(e, HazardType.RADIATION, ContaminationType.CREATIVE, eRads);
+			ContaminationUtil.contaminate(e, HazardType.NEUTRON, ContaminationType.CREATIVE, eRads);
+			if(e instanceof EntityPlayer && !RadiationConfig.disableNeutron) {
+				EntityPlayer player = (EntityPlayer) e;
+				for(int i = 0; i < player.inventory.mainInventory.length; i++) {
+					HazardTypeNeutron.apply(player.inventory.getStackInSlot(i), eRads);
+				}
+				for(int i = 0; i < player.inventory.armorInventory.length; i++) {
+					HazardTypeNeutron.apply(player.inventory.armorItemInSlot(i), eRads);
+				}
+			}
 			
 			if(len < 2) {
 				e.attackEntityFrom(DamageSource.inFire, 100);
