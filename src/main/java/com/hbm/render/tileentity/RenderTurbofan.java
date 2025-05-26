@@ -2,17 +2,13 @@ package com.hbm.render.tileentity;
 
 import org.lwjgl.opengl.GL11;
 
-import com.hbm.blocks.ModBlocks;
 import com.hbm.main.ResourceManager;
-import com.hbm.render.item.ItemRenderBase;
 import com.hbm.tileentity.machine.TileEntityMachineTurbofan;
 
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.client.IItemRenderer;
 
-public class RenderTurbofan extends TileEntitySpecialRenderer implements IItemRendererProvider {
+public class RenderTurbofan extends TileEntitySpecialRenderer {
 
 	public RenderTurbofan() {
 	}
@@ -55,28 +51,5 @@ public class RenderTurbofan extends TileEntitySpecialRenderer implements IItemRe
 		GL11.glShadeModel(GL11.GL_FLAT);
 
 		GL11.glPopMatrix();
-	}
-
-	@Override
-	public Item getItemForRenderer() {
-		return Item.getItemFromBlock(ModBlocks.machine_turbofan);
-	}
-
-	@Override
-	public IItemRenderer getRenderer() {
-		return new ItemRenderBase() {
-			public void renderInventory() {
-				GL11.glRotated(90, 0, 1, 0);
-				GL11.glScaled(2.25, 2.25, 2.25);
-			}
-			public void renderCommon() {
-				GL11.glShadeModel(GL11.GL_SMOOTH);
-				bindTexture(ResourceManager.turbofan_tex);
-				ResourceManager.turbofan.renderPart("Body");
-				ResourceManager.turbofan.renderPart("Blades");
-				bindTexture(ResourceManager.turbofan_back_tex);
-				ResourceManager.turbofan.renderPart("Afterburner");
-				GL11.glShadeModel(GL11.GL_FLAT);
-			}};
 	}
 }

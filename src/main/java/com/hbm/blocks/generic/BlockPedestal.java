@@ -2,7 +2,6 @@ package com.hbm.blocks.generic;
 
 import java.util.List;
 
-import com.hbm.extprop.HbmPlayerProps;
 import com.hbm.inventory.recipes.PedestalRecipes;
 import com.hbm.inventory.recipes.PedestalRecipes.PedestalRecipe;
 import com.hbm.lib.RefStrings;
@@ -43,7 +42,7 @@ public class BlockPedestal extends BlockContainer {
 	public TileEntity createNewTileEntity(World world, int meta) {
 		return new TileEntityPedestal();
 	}
-	
+
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerBlockIcons(IIconRegister iconRegister) {
@@ -59,18 +58,34 @@ public class BlockPedestal extends BlockContainer {
 
 	public static int renderID = RenderingRegistry.getNextAvailableRenderId();
 
-	@Override public int getRenderType() { return renderID; }
-	@Override public boolean isOpaqueCube() { return false; }
-	@Override public boolean renderAsNormalBlock() { return false; }
-	@Override @SideOnly(Side.CLIENT) public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) { return true; }
+	@Override
+	public int getRenderType() {
+		return renderID;
+	}
+
+	@Override
+	public boolean isOpaqueCube() {
+		return false;
+	}
+
+	@Override
+	public boolean renderAsNormalBlock() {
+		return false;
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
+		return true;
+	}
 
 	@Override
 	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int side, float hitX, float hitY, float hitZ) {
 		if(world.isRemote) return true;
 		if(player.isSneaking()) return false;
-		
+
 		TileEntityPedestal pedestal = (TileEntityPedestal) world.getTileEntity(x, y, z);
-		
+
 		if(pedestal.item == null && player.getHeldItem() != null) {
 			pedestal.item = player.getHeldItem().copy();
 			player.inventory.mainInventory[player.inventory.currentItem] = null;
@@ -84,13 +99,13 @@ public class BlockPedestal extends BlockContainer {
 			world.markBlockForUpdate(x, y, z);
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	@Override
 	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
-		
+
 		if(!world.isRemote) {
 			TileEntityPedestal entity = (TileEntityPedestal) world.getTileEntity(x, y, z);
 			if(entity != null && entity.item != null) {
@@ -98,7 +113,7 @@ public class BlockPedestal extends BlockContainer {
 				world.spawnEntityInWorld(item);
 			}
 		}
-		
+
 		super.breakBlock(world, x, y, z, block, meta);
 	}
 
@@ -106,7 +121,7 @@ public class BlockPedestal extends BlockContainer {
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block b) {
 		if(!world.isRemote) {
 			if(world.isBlockIndirectlyGettingPowered(x, y, z)) {
-				
+
 				TileEntityPedestal nw = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.NORTH.offsetX * 2 + ForgeDirection.WEST.offsetX * 2, y, z + ForgeDirection.NORTH.offsetZ * 2 + ForgeDirection.WEST.offsetZ * 2));
 				TileEntityPedestal n = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.NORTH.offsetX * 3, y, z + ForgeDirection.NORTH.offsetZ * 3));
 				TileEntityPedestal ne = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.NORTH.offsetX * 2 + ForgeDirection.EAST.offsetX * 2, y, z + ForgeDirection.NORTH.offsetZ * 2 + ForgeDirection.EAST.offsetZ * 2));
@@ -116,50 +131,34 @@ public class BlockPedestal extends BlockContainer {
 				TileEntityPedestal sw = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.SOUTH.offsetX * 2 + ForgeDirection.WEST.offsetX * 2, y, z + ForgeDirection.SOUTH.offsetZ * 2 + ForgeDirection.WEST.offsetZ * 2));
 				TileEntityPedestal s = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.SOUTH.offsetX * 3, y, z + ForgeDirection.SOUTH.offsetZ * 3));
 				TileEntityPedestal se = castOrNull(Compat.getTileStandard(world, x + ForgeDirection.SOUTH.offsetX * 2 + ForgeDirection.EAST.offsetX * 2, y, z + ForgeDirection.SOUTH.offsetZ * 2 + ForgeDirection.EAST.offsetZ * 2));
-				
+
 				TileEntityPedestal[] tileArray = new TileEntityPedestal[] {nw, n, ne, w, center, e, sw, s, se};
-				List<EntityPlayer> nearbyPlayers = world.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 1).expand(20, 20, 20));
-				
+
 				outer: for(PedestalRecipe recipe : PedestalRecipes.recipes) {
-					
-					/// EXTRA CONDITIONS ///
+
 					if(recipe.extra == recipe.extra.FULL_MOON) {
 						if(world.getCelestialAngle(0) < 0.35 || world.getCelestialAngle(0) > 0.65) continue;
-						if(world.provider.getMoonPhase(world.getWorldInfo().getWorldTime()) != 0) continue;
+						if(world.provider.getMoonPhase(world.getWorldTime()) != 0) continue;
 					}
-					
+
 					if(recipe.extra == recipe.extra.NEW_MOON) {
 						if(world.getCelestialAngle(0) < 0.35 || world.getCelestialAngle(0) > 0.65) continue;
-						if(world.provider.getMoonPhase(world.getWorldInfo().getWorldTime()) != 4) continue;
+						if(world.provider.getMoonPhase(world.getWorldTime()) != 4) continue;
 					}
-					
+
 					if(recipe.extra == recipe.extra.SUN) {
 						if(world.getCelestialAngle(0) > 0.15 && world.getCelestialAngle(0) < 0.85) continue;
 					}
-					
-					if(recipe.extra == recipe.extra.BAD_KARMA) {
-						boolean matches = false;
-						for(EntityPlayer player : nearbyPlayers) if(HbmPlayerProps.getData(player).reputation <= -10) { matches = true; break; }
-						if(!matches) continue;
-					}
-					
-					if(recipe.extra == recipe.extra.GOOD_KARMA) {
-						boolean matches = false;
-						for(EntityPlayer player : nearbyPlayers) if(HbmPlayerProps.getData(player).reputation >= 10) { matches = true; break; }
-						if(!matches) continue;
-					}
-					
-					/// CHECK ITEMS ///
+
 					for(int i = 0; i < 9; i++) {
 						ItemStack pedestal = tileArray[i] != null ? tileArray[i].item : null;
 						if(pedestal == null && recipe.input[i] != null) continue outer;
 						if(pedestal != null && recipe.input[i] == null) continue outer;
 						if(pedestal == null && recipe.input[i] == null) continue;
-						
+
 						if(!recipe.input[i].matchesRecipe(pedestal, true) || recipe.input[i].stacksize != pedestal.stackSize) continue outer;
 					}
-					
-					/// REMOVE ITEMS ///
+
 					for(int i = 0; i < 9; i++) {
 						if(i == 4) continue;
 						ItemStack pedestal = tileArray[i] != null ? tileArray[i].item : null;
@@ -169,21 +168,20 @@ public class BlockPedestal extends BlockContainer {
 						world.markBlockForUpdate(tileArray[i].xCoord, tileArray[i].yCoord, tileArray[i].zCoord);
 					}
 
-					/// PRODUCE RESULT ///
 					center.item = recipe.output.copy();
 					center.markDirty();
 					world.markBlockForUpdate(x, y, z);
 					ExplosionSmallCreator.composeEffect(world, x + 0.5, y + 1.5, z + 0.5, 10, 2.5F, 1F);
-					
+
 					List<EntityPlayer> players = world.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox(x + 0.5, y, z + 0.5, x + 0.5, y, z + 0.5).expand(50, 50, 50));
 					for(EntityPlayer player : players) player.addStat(MainRegistry.statLegendary, 1);
-					
+
 					return;
 				}
 			}
 		}
 	}
-	
+
 	public static TileEntityPedestal castOrNull(TileEntity tile) {
 		if(tile instanceof TileEntityPedestal) return (TileEntityPedestal) tile;
 		return null;
@@ -192,8 +190,11 @@ public class BlockPedestal extends BlockContainer {
 	public static class TileEntityPedestal extends TileEntity {
 
 		public ItemStack item;
-		
-		@Override public boolean canUpdate() { return false; }
+
+		@Override
+		public boolean canUpdate() {
+			return false;
+		}
 
 		@Override
 		public Packet getDescriptionPacket() {
@@ -201,7 +202,7 @@ public class BlockPedestal extends BlockContainer {
 			this.writeToNBT(nbt);
 			return new S35PacketUpdateTileEntity(this.xCoord, this.yCoord, this.zCoord, 0, nbt);
 		}
-		
+
 		@Override
 		public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
 			this.readFromNBT(pkt.func_148857_g());

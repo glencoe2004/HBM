@@ -3,6 +3,9 @@ package com.hbm.util;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import com.hbm.handler.ArmorModHandler;
+import com.hbm.items.ModItems;
+
 import com.hbm.config.ServerConfig;
 
 import cpw.mods.fml.relauncher.ReflectionHelper;
@@ -13,15 +16,39 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraftforge.common.ForgeHooks;
 
 public class EntityDamageUtil {
+
+	public static boolean wasAttackedByV1(DamageSource source) {
+
+		if(source instanceof EntityDamageSource) {
+			Entity attacker = ((EntityDamageSource) source).getEntity();
+
+			if(attacker instanceof EntityPlayer) {
+				EntityPlayer player = (EntityPlayer) attacker;
+				ItemStack chestplate = player.inventory.armorInventory[2];
+
+				if(chestplate != null && ArmorModHandler.hasMods(chestplate)) {
+					ItemStack[] mods = ArmorModHandler.pryMods(chestplate);
+
+					if(mods[ArmorModHandler.extra] != null && mods[ArmorModHandler.extra].getItem() == ModItems.v1) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
 
 	/** Shitty hack, if the first attack fails, it retries with damage + previous damage, allowing damage to penetrate */
 	@Deprecated public static boolean attackEntityFromIgnoreIFrame(Entity victim, DamageSource src, float damage) {
@@ -53,14 +80,14 @@ public class EntityDamageUtil {
 		DamageResistanceHandler.reset();
 		return ret;
 	}
-	
+
 	private static boolean attackEntityFromNTInternal(EntityLivingBase living, DamageSource source, float amount, boolean ignoreIFrame, boolean allowSpecialCancel, double knockbackMultiplier) {
 		boolean superCompatibility = ServerConfig.DAMAGE_COMPATIBILITY_MODE.get();
 		return superCompatibility
 				? attackEntitySuperCompatibility(living, source, amount, ignoreIFrame, allowSpecialCancel, knockbackMultiplier)
 				: attackEntitySEDNAPatch(living, source, amount, ignoreIFrame, allowSpecialCancel, knockbackMultiplier);
 	}
-	
+
 	/**
 	 * MK2 SEDNA damage system, currently untested. An even hackier, yet more compatible solution using the vanilla damage calc directly but tweaking certain apsects.
 	 * Limitation: Does not apply DR piercing to vanilla armor

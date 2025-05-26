@@ -1,5 +1,6 @@
 package com.hbm.entity.mob;
 
+import com.hbm.config.GeneralConfig;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.items.ModItems;
 import com.hbm.packet.toclient.AuxParticlePacketNT;
@@ -64,12 +65,23 @@ public class EntityQuackos extends EntityDuck implements IBossDisplayData {
 		return true;
 	}
 
+	private int killCounter = 0;
+
 	/**
-	 * BOW
+	 * pluck
 	 */
 	public void setDead() {
-		if(worldObj.isRemote)
+		if(worldObj.isRemote) {
 			super.setDead();
+		} else if(GeneralConfig.enableSacrilege) {
+			// if killed once per tick for a second OR if killed sequentially 10 times
+			// this is so that if the software absolutely must kill the bastard, it eventually will get culled
+			// sorry, invincibility is a burden on server operators
+			killCounter += 2;
+			if(killCounter > 20) {
+				super.setDead();
+			}
+		}
 	} //prank'd
 
 	/**
@@ -154,6 +166,8 @@ public class EntityQuackos extends EntityDuck implements IBossDisplayData {
 		if(!worldObj.isRemote && this.posY < -30) {
 			this.setPosition(this.posX + rand.nextGaussian() * 30, 256, this.posZ + rand.nextGaussian() * 30);
 		}
+
+		if(killCounter > 0) killCounter--;
 	}
 
 	/**

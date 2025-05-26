@@ -1,8 +1,10 @@
-# HBM's Nuclear Tech Mod for Minecraft 1.7.10
+# HBM's Nuclear Tech Mod + JameH2 Space for Minecraft 1.7.10
 
-[NTM on Modrinth](https://modrinth.com/mod/ntm)
+Hi, i am memeing things into existence, dont mind me! im just the bent fork at the end of the table -JamesH_2
 
-[NTM on CurseForge](https://minecraft.curseforge.com/projects/hbms-nuclear-tech-mod?gameCategorySlug=mc-mods&projectID=235439)
+[NTM Space on Modrinth](https://modrinth.com/mod/ntmspace)
+
+[NTM Space on CurseForge](https://www.curseforge.com/minecraft/mc-mods/ntm-space)
 
 [Official NTM Wiki](https://nucleartech.wiki/wiki/Main_Page)
 
@@ -35,7 +37,7 @@ Please note that these installation instructions are assuming you're running Mic
  ```
  5. Download the source code:
  ```bash
-     git clone https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT.git
+     git clone https://github.com/JameH2/Hbm-s-Nuclear-Tech-GIT.git
  ```
  4. Enter the source code directory
  ```bash
@@ -66,7 +68,7 @@ If you want to make some changes to the mod, follow this guide:
 ```
    * Download the source code:
 ```bash
-    git clone https://github.com/HbmMods/Hbm-s-Nuclear-Tech-GIT.git
+    git clone https://github.com/JameH2/Hbm-s-Nuclear-Tech-GIT.git
  ```
    * Move or copy every file within the new folder into your directory, making sure to overwrite any files.
    * Feel free to delete the remaining folder and rename your directory (such as "Hbm-s-Nuclear-Tech-GIT")
@@ -113,6 +115,7 @@ One of the most common "performance" mods on 1.7.10, Optifine, achieves an incre
 * Get rid of Optifine and use one of the many [other, less intrusive performance mods](https://gist.github.com/makamys/7cb74cd71d93a4332d2891db2624e17c).
 * Blocks with connected textures may become invisible. This can be fixed by toggling triangulation (I do not know what or where this setting is, I just have been told that it exists and that it can fix the problem) or multicore chunk rendering (same here).
 * Entity "optimization" has a tendency to break chunkloading, this is especially noticeable with missiles which rely heavily on chunkloading to work, causing them to freeze mid-air. It's unclear what setting might fix this, and analysis of Optifine's source code (or rather, lack thereof) has not proven useful either.
+   * This issue will also cause orbital stations to never reach orbit, I can't emphasize enough how much pain and misery this "performance" mod will cause you, use Angelica instead.
 
 ### Angelica
 In older versions, Angelica caused issues regarding model rendering, often times making 3D models transparent. Ever since the switch to VBOs, models work fine. Another issue was blocks with connected textures not rendering at all, but this too was fixed, meaning as of time of writing there are no major incompatibilities known with Angelica. However there a few minor issues that persist, but those can be fixed:

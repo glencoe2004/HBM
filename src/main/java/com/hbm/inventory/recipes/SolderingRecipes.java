@@ -90,6 +90,26 @@ public class SolderingRecipes extends SerializableRecipe {
 				new AStack[] {
 						new OreDictStack(PB.wireFine(), 12)}
 		));
+
+		recipes.add(new SolderingRecipe(new ItemStack(ModItems.circuit, 1, EnumCircuitType.AVIONICS.ordinal()), 300, 1_000,
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 3, EnumCircuitType.CHIP)},
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 1, EnumCircuitType.ADVANCED),
+						new OreDictStack(RUBBER.ingot(), 4)},
+				new AStack[] {
+						new OreDictStack(PB.wireFine(), 4)}
+		));
+		recipes.add(new SolderingRecipe(new ItemStack(ModItems.circuit, 1, EnumCircuitType.AERO.ordinal()), 300, 1_000,
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 3, EnumCircuitType.CHIP)},
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 1, EnumCircuitType.BASIC),
+						new ComparableStack(ModItems.nugget_hafnium, 1)},
+				new AStack[] {
+						new OreDictStack(PB.wireFine(), 4)} // temp 
+		));
+		
 		
 		recipes.add(new SolderingRecipe(new ItemStack(ModItems.circuit, 1, EnumCircuitType.QUANTUM.ordinal()), 400, 100_000,
 				new FluidStack(Fluids.HELIUM4, 1_000),
@@ -126,7 +146,7 @@ public class SolderingRecipes extends SerializableRecipe {
 				new AStack[] {
 						new ComparableStack(ModItems.circuit, lbsm ? 8 : 16, EnumCircuitType.CHIP_BISMOID),
 						new ComparableStack(ModItems.circuit, lbsm ? 16 : 48, EnumCircuitType.CAPACITOR_TANTALIUM),
-						new ComparableStack(ModItems.circuit, 1, EnumCircuitType.ATOMIC_CLOCK)},
+						new ComparableStack(ModItems.circuit, lbsm ? 8 : 32, EnumCircuitType.CAPACITOR_LANTHANIUM)},
 				new AStack[] {
 						new ComparableStack(ModItems.circuit, 1, EnumCircuitType.CONTROLLER_CHASSIS),
 						new ComparableStack(ModItems.upgrade_speed_3)},
@@ -146,6 +166,17 @@ public class SolderingRecipes extends SerializableRecipe {
 						new OreDictStack(PB.wireFine(), 32)}
 		));
 
+		
+		
+		recipes.add(new SolderingRecipe(new ItemStack(ModItems.hard_drive, 1), 200, 250,
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 2, EnumCircuitType.CHIP)},
+				new AStack[] {
+						new ComparableStack(ModItems.circuit, 16, EnumCircuitType.PCB)},
+				new AStack[] {
+						new OreDictStack(MINGRADE.wireFine(), 4)}
+		));
+		
 		/*
 		 * UPGRADES
 		 */
@@ -185,6 +216,8 @@ public class SolderingRecipes extends SerializableRecipe {
 				new AStack[] {new ComparableStack(ModItems.upgrade_template), new OreDictStack(LI.dust(), 4)},
 				new AStack[] {}
 		));
+		
+		
 		
 		addFirstUpgrade(ModItems.upgrade_speed_1, ModItems.upgrade_speed_2);
 		addSecondUpgrade(ModItems.upgrade_speed_2, ModItems.upgrade_speed_3);

@@ -22,6 +22,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.config.VersatileConfig;
 import com.hbm.entity.grenade.EntityGrenadeASchrab;
 import com.hbm.entity.grenade.EntityGrenadeNuclear;
+import com.hbm.entity.missile.EntityMIRV;
 import com.hbm.entity.projectile.EntityBulletBaseNT;
 import com.hbm.entity.projectile.EntityExplosiveBeam;
 import com.hbm.interfaces.Spaghetti;
@@ -102,6 +103,7 @@ public class ExplosionNukeGeneric {
 	private static boolean isExplosionExempt(Entity e) {
 		
 		if (e instanceof EntityOcelot ||
+				e instanceof EntityMIRV ||
 				e instanceof EntityGrenadeASchrab ||
 				e instanceof EntityGrenadeNuclear ||
 				e instanceof EntityExplosiveBeam ||

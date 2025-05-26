@@ -2,8 +2,11 @@ package com.hbm.items.food;
 
 import java.util.List;
 
+
+import com.hbm.extprop.HbmPlayerProps;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.items.ModItems;
+import com.hbm.potion.HbmPotion;
 import com.hbm.packet.toclient.AuxParticlePacketNT;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraft.entity.player.EntityPlayer;
@@ -87,6 +90,9 @@ public class ItemLemon extends ItemFood {
 		if(this == ModItems.quesadilla) {
 			list.add("That's what a 50 year old yeast infection does to you.");
 		}
+		if(this == ModItems.flesh_burger) {
+			list.add("juicy!.");
+		}
 	}
 
 
@@ -95,7 +101,11 @@ public class ItemLemon extends ItemFood {
     {
 		if(this == ModItems.med_ipecac || this == ModItems.med_ptsd) {
 			player.addPotionEffect(new PotionEffect(Potion.hunger.id, 50, 49));
-
+			HbmPlayerProps props = HbmPlayerProps.getData(player);
+			if (props.nitanCount > 0){
+				player.removePotionEffect(HbmPotion.nitan.id);
+				props.nitanCount = 0;
+			}
 			NBTTagCompound nbt = new NBTTagCompound();
 			nbt.setString("type", "vomit");
 			nbt.setInteger("entity", player.getEntityId());
@@ -113,6 +123,9 @@ public class ItemLemon extends ItemFood {
 			player.addPotionEffect(new PotionEffect(Potion.moveSpeed.id, 60 * 20, 1));
 			player.addPotionEffect(new PotionEffect(Potion.damageBoost.id, 20 * 20, 2));
 		}
+		if(this == ModItems.s_cream) {
+			player.addPotionEffect(new PotionEffect(Potion.regeneration.id, 20 * 20, 2));
+		}
     }
 
     public ItemStack onEaten(ItemStack stack, World worldObj, EntityPlayer player)
@@ -123,7 +136,5 @@ public class ItemLemon extends ItemFood {
         	return new ItemStack(Items.bowl);
 
         return sta;
-
     }
-
 }

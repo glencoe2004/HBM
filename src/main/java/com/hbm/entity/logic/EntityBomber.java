@@ -240,6 +240,23 @@ public class EntityBomber extends EntityPlaneBase {
 		return bomber;
 	}
 
+    public static EntityBomber statFacCV(World world, double x, double y, double z) {
+    	EntityBomber bomber = new EntityBomber(world);
+    	
+    	bomber.timer = 200;
+    	bomber.bombStart = 75;
+    	bomber.bombStop = 125;
+    	bomber.bombRate = 90000;
+
+    	bomber.fac(world, x, y+16, z); //adding the y value breaks things, sorry bluehat
+    	
+    	bomber.getDataWatcher().updateObject(16, (byte)9);
+    	
+    	bomber.type = 8;
+    	
+    	return bomber;
+    }
+
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbt) {
 		super.readEntityFromNBT(nbt);

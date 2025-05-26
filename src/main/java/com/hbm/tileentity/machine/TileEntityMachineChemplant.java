@@ -280,6 +280,10 @@ public class TileEntityMachineChemplant extends TileEntityMachineBase implements
 		if(!hasRequiredItems(recipe)) return false;
 		if(!hasSpaceForItems(recipe)) return false;
 
+		if(recipe.oxygenConsumption > 0) {
+			return breatheAir(recipe.oxygenConsumption);
+		}
+
 		return true;
 	}
 

@@ -2,6 +2,7 @@ package com.hbm.blocks.bomb;
 
 import java.util.List;
 
+import com.hbm.config.GeneralConfig;
 import com.hbm.explosion.vanillant.ExplosionVNT;
 import com.hbm.explosion.vanillant.standard.BlockAllocatorStandard;
 import com.hbm.explosion.vanillant.standard.BlockProcessorStandard;
@@ -49,4 +50,5 @@ public class BlockChargeSemtex extends BlockChargeBase {
 		list.add(EnumChatFormatting.BLUE + "");
 		list.add(EnumChatFormatting.LIGHT_PURPLE + "Fortune III");
 	}
+	
 }

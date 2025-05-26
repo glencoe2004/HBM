@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import com.hbm.blocks.ModBlocks;
+import com.hbm.dim.SolarSystem;
 import com.hbm.inventory.container.ContainerMachineOilWell;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTank;
@@ -33,7 +34,7 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
 	protected static int consumption = 5000;
 	protected static int solutionRequired = 10;
 	protected static int delay = 20;
-	protected static int oilPerDepsoit = 1000;
+	protected static int oilPerDeposit = 1000;
 	protected static int gasPerDepositMin = 100;
 	protected static int gasPerDepositMax = 500;
 	protected static double drainChance = 0.02D;
@@ -41,6 +42,8 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
 	protected static int gasPerBedrockDepositMin = 10;
 	protected static int gasPerBedrockDepositMax = 50;
 	protected static int destructionRange = 75;
+	protected static int oilPerDunaDeposit = 300;
+	protected static double DunadrainChance = 0.05D; //Duna should yield less oil due to it being mostly a meme and also a dead planet
 
 	public TileEntityMachineFrackingTower() {
 		super();
@@ -104,18 +107,42 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
 	public void onSuck(int x, int y, int z) {
 		
 		Block b = worldObj.getBlock(x, y, z);
+		int meta = worldObj.getBlockMetadata(x, y, z);
 		
 		int oil = 0;
 		int gas = 0;
 
 		if(b == ModBlocks.ore_oil) {
-			oil = oilPerDepsoit;
-			gas = gasPerDepositMin + worldObj.rand.nextInt(gasPerDepositMax - gasPerDepositMin + 1);
-			
-			if(worldObj.rand.nextDouble() < drainChance) {
-				worldObj.setBlock(x, y, z, ModBlocks.ore_oil_empty);
+			if(meta == SolarSystem.Body.DUNA.ordinal()) {
+				tanks[0].setTankType(Fluids.OIL);
+
+				oil = oilPerDunaDeposit;
+				gas = gasPerDepositMin + worldObj.rand.nextInt(gasPerDepositMax - gasPerDepositMin + 1);
+				
+				if(worldObj.rand.nextDouble() < DunadrainChance) {
+					worldObj.setBlock(x, y, z, ModBlocks.ore_oil_empty, meta, 3);
+				}
+			} else if(meta == SolarSystem.Body.LAYTHE.ordinal()) {
+				tanks[0].setTankType(Fluids.OIL_DS);
+
+				oil = oilPerDeposit;
+				gas = gasPerDepositMin + worldObj.rand.nextInt(gasPerDepositMax - gasPerDepositMin + 1);
+				
+				if(worldObj.rand.nextDouble() < drainChance) {
+					worldObj.setBlock(x, y, z, ModBlocks.ore_oil_empty, meta, 3);
+				}
+			} else {
+				tanks[0].setTankType(Fluids.OIL);
+
+				oil = oilPerDeposit;
+				gas = gasPerDepositMin + worldObj.rand.nextInt(gasPerDepositMax - gasPerDepositMin + 1);
+				
+				if(worldObj.rand.nextDouble() < drainChance) {
+					worldObj.setBlock(x, y, z, ModBlocks.ore_oil_empty, meta, 3);
+				}
 			}
 		}
+		
 		if(b == ModBlocks.ore_bedrock_oil) {
 			oil = oilPerBedrockDepsoit;
 			gas = gasPerBedrockDepositMin + worldObj.rand.nextInt(gasPerBedrockDepositMax - gasPerBedrockDepositMin + 1);
@@ -175,7 +202,7 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
 		consumption = IConfigurableMachine.grab(obj, "I:consumption", consumption);
 		solutionRequired = IConfigurableMachine.grab(obj, "I:solutionRequired", solutionRequired);
 		delay = IConfigurableMachine.grab(obj, "I:delay", delay);
-		oilPerDepsoit = IConfigurableMachine.grab(obj, "I:oilPerDeposit", oilPerDepsoit);
+		oilPerDeposit = IConfigurableMachine.grab(obj, "I:oilPerDeposit", oilPerDeposit);
 		gasPerDepositMin = IConfigurableMachine.grab(obj, "I:gasPerDepositMin", gasPerDepositMin);
 		gasPerDepositMax = IConfigurableMachine.grab(obj, "I:gasPerDepositMax", gasPerDepositMax);
 		drainChance = IConfigurableMachine.grab(obj, "D:drainChance", drainChance);
@@ -191,7 +218,7 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
 		writer.name("I:consumption").value(consumption);
 		writer.name("I:solutionRequired").value(solutionRequired);
 		writer.name("I:delay").value(delay);
-		writer.name("I:oilPerDeposit").value(oilPerDepsoit);
+		writer.name("I:oilPerDeposit").value(oilPerDeposit);
 		writer.name("I:gasPerDepositMin").value(gasPerDepositMin);
 		writer.name("I:gasPerDepositMax").value(gasPerDepositMax);
 		writer.name("D:drainChance").value(drainChance);

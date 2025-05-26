@@ -121,6 +121,7 @@ public class BulletConfiguration implements Cloneable {
 	public boolean dmgExplosion = false;
 	public boolean dmgBypass = false;
 
+
 	public static final int STYLE_NONE = -1;
 	public static final int STYLE_NORMAL = 0;
 	public static final int STYLE_PISTOL = 1;
@@ -141,6 +142,7 @@ public class BulletConfiguration implements Cloneable {
 	public static final int STYLE_BARREL = 16;
 	public static final int STYLE_TAU = 17;
 	public static final int STYLE_LEADBURSTER = 18;
+	public static final int STYLE_WAR = 19;
 
 	public static final int PLINK_NONE = 0;
 	public static final int PLINK_BULLET = 1;
@@ -211,7 +213,6 @@ public class BulletConfiguration implements Cloneable {
 		this.ammo = new ComparableStack(ammo);
 		return getChlorophyte();
 	}
-	
 	public BulletConfiguration accuracyMod(float mod) {
 		
 		this.spread *= mod;

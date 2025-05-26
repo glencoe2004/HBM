@@ -10,15 +10,12 @@ import com.hbm.util.ContaminationUtil;
 
 import api.hbm.tile.IInfoProviderEC;
 import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
 
 @Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "OpenComputers")})
 public class TileEntityGeiger extends TileEntity implements SimpleComponent, IInfoProviderEC, CompatHandler.OCComponent {
@@ -38,6 +35,7 @@ public class TileEntityGeiger extends TileEntity implements SimpleComponent, IIn
 
 		if(timer % 5 == 0) {
 			if(ticker > 0) {
+				if(worldObj.rand.nextFloat() > ticker) return;
 				List<Integer> list = new ArrayList<Integer>();
 
 				if(ticker < 1)
@@ -89,18 +87,5 @@ public class TileEntityGeiger extends TileEntity implements SimpleComponent, IIn
 		int rads = check();
 		String chunkPrefix = ContaminationUtil.getPreffixFromRad(rads);
 		data.setString(CompatEnergyControl.S_CHUNKRAD, chunkPrefix + rads + " RAD/s");
-
-	}
-	
-	@Override
-	public AxisAlignedBB getRenderBoundingBox() {
-		return AxisAlignedBB.getBoundingBox(xCoord, yCoord, zCoord, xCoord + 1, yCoord + 1, zCoord + 1);
-	}
-
-	@Override
-	@SideOnly(Side.CLIENT)
-	public double getMaxRenderDistanceSquared()
-	{
-		return 65536.0D;
 	}
 }

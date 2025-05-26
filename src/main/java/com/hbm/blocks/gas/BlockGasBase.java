@@ -88,7 +88,6 @@ public abstract class BlockGasBase extends Block {
 	
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
-		
 		if(world.getBlockMetadata(x, y, z) != 0) {
 			world.setBlockMetadataWithNotify(x, y, z, 0, 4);
 			world.scheduleBlockUpdate(x, y, z, this, 10);
@@ -140,17 +139,20 @@ public abstract class BlockGasBase extends Block {
 		super.randomDisplayTick(world, x, y, z, rand);
 		
 		EntityPlayer p = MainRegistry.proxy.me();
-		if(ArmorUtil.checkArmorPiece(p, ModItems.ashglasses, 3)) {
-			NBTTagCompound data = new NBTTagCompound();
-			data.setString("type", "vanillaExt");
-			data.setString("mode", "cloud");
-			data.setDouble("posX", x + 0.5);
-			data.setDouble("posY", y + 0.5);
-			data.setDouble("posZ", z + 0.5);
-			data.setFloat("r", red);
-			data.setFloat("g", green);
-			data.setFloat("b", blue);
-			MainRegistry.proxy.effectNT(data);
+		if(ArmorUtil.checkArmorPiece(p, ModItems.ashglasses, 3) && this != ModBlocks.vacuum) {
+			if(rand.nextInt(9)==1)
+			{
+				NBTTagCompound data = new NBTTagCompound();
+				data.setString("type", "vanillaExt");
+				data.setString("mode", "cloud");
+				data.setDouble("posX", x + 0.5);
+				data.setDouble("posY", y + 0.5);
+				data.setDouble("posZ", z + 0.5);
+				data.setFloat("r", red);
+				data.setFloat("g", green);
+				data.setFloat("b", blue);
+				MainRegistry.proxy.effectNT(data);
+			}
 		}
 	}
 }

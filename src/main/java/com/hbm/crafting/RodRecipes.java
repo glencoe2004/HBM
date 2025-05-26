@@ -14,6 +14,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraft.stats.StatList;
 
 /**
  * For the loading and unloading of fuel rods
@@ -110,6 +111,7 @@ public class RodRecipes {
 		addRBMKRod(AMRG, ModItems.rbmk_fuel_mea);
 		addRBMKRod(AM241, ModItems.rbmk_fuel_hea241);
 		addRBMKRod(AM242, ModItems.rbmk_fuel_hea242);
+		addRBMKRod(BK247, ModItems.rbmk_fuel_bk247);
 		addRBMKRod(ModItems.billet_neptunium_fuel, ModItems.rbmk_fuel_men);
 		addRBMKRod(NP237, ModItems.rbmk_fuel_hen);
 		addRBMKRod(ModItems.billet_po210be, ModItems.rbmk_fuel_po210be);
@@ -127,7 +129,10 @@ public class RodRecipes {
 		addRBMKRod(ModItems.billet_zfb_pu241, ModItems.rbmk_fuel_zfb_pu241);
 		addRBMKRod(ModItems.billet_zfb_am_mix, ModItems.rbmk_fuel_zfb_am_mix);
 		CraftingManager.addShapelessAuto(new ItemStack(ModItems.rbmk_fuel_drx, 1), new Object[] { ModItems.rbmk_fuel_balefire, ModItems.particle_digamma });
-
+		addRBMKRod(ModItems.billet_cm_fuel, ModItems.rbmk_fuel_lecm);
+		addRBMKRod(CMRG, ModItems.rbmk_fuel_mecm);
+		addRBMKRod(CM245, ModItems.rbmk_fuel_hecm);
+		
 		addPellet(SA326,							EnumWatzType.SCHRABIDIUM);
 		addPellet(ModItems.ingot_hes,				EnumWatzType.HES);
 		addPellet(ModItems.ingot_schrabidium_fuel,	EnumWatzType.MES);
@@ -138,6 +143,15 @@ public class RodRecipes {
 		addPellet(PB,								EnumWatzType.LEAD);
 		addPellet(B,								EnumWatzType.BORON);
 		addPellet(U238,								EnumWatzType.DU);
+		addPellet(PU241,							EnumWatzType.PU241);
+		addPellet(AMF,								EnumWatzType.AMF);
+		addPellet(AMRG,								EnumWatzType.AMRG);
+		addPellet(CMRG,								EnumWatzType.CMRG);
+		addPellet(CMF,								EnumWatzType.CMF);
+		addPellet(BK247,							EnumWatzType.BK247);
+		addPellet(CF252,							EnumWatzType.CF252);
+		addPellet(CF251,							EnumWatzType.CF251);
+		addPellet(ES253,							EnumWatzType.ES253);
 		
 		//PWR fuel
 		CraftingManager.addRecipeAuto(DictFrame.fromOne(ModItems.pwr_fuel, EnumPWRFuel.MEU), new Object[] { "F", "I", "F", 'F', ModItems.billet_uranium_fuel, 'I', ModItems.plate_polymer });
@@ -163,6 +177,8 @@ public class RodRecipes {
 		/* GT6 */
 		if(OreDictionary.doesOreNameExist("ingotNaquadah-Enriched"))	addPellet(new DictFrame("Naquadah-Enriched"),	EnumWatzType.NQD);
 		if(OreDictionary.doesOreNameExist("ingotNaquadria"))			addPellet(new DictFrame("Naquadria"),			EnumWatzType.NQR);
+		CraftingManager.addShapelessAuto(new ItemStack(ModItems.rbmk_fuel_drx, 1), new Object[] { ModItems.rbmk_fuel_balefire, ModItems.particle_digamma });
+
 	}
 	
 	//Fill rods with one billet. For fuels only, therefore no unloading or ore dict

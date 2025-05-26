@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.hbm.blocks.ILookOverlay;
+import com.hbm.config.GeneralConfig;
 import com.hbm.lib.RefStrings;
 import com.hbm.tileentity.machine.TileEntityMachineTeleporter;
 import com.hbm.util.I18nUtil;
@@ -62,7 +63,10 @@ public class MachineTeleporter extends BlockContainer implements ILookOverlay {
 		if(tele.targetY == -1) {
 			text.add(EnumChatFormatting.RED + "No destination set!");
 		} else {
-			text.add((tele.power >= tele.consumption ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + String.format(Locale.US, "%,d", tele.power) + " / " + String.format(Locale.US, "%,d", tele.maxPower));
+			text.add((tele.power >= tele.consumption ? EnumChatFormatting.GREEN : EnumChatFormatting.RED) + String.format("%,d", tele.power) + " / " + String.format("%,d", tele.maxPower));
+			if(world.provider.dimensionId != tele.targetDim) {
+				text.add(I18nUtil.resolveKey("hbmfluid." + tele.tank.getTankType().getName().toLowerCase()) + ": " + tele.tank.getFill() + "/" + tele.tank.getMaxFill() + "mB");
+			}
 			text.add("Destination: " + tele.targetX + " / " + tele.targetY + " / " + tele.targetZ + " (D: " + tele.targetDim + ")");
 		}
 		
