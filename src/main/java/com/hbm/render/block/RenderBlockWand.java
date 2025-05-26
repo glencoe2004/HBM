@@ -20,6 +20,7 @@ public class RenderBlockWand implements ISimpleBlockRenderingHandler {
 		renderer.renderStandardBlock(block, x, y, z);
 		renderer.renderFromInside = false;
 		renderer.renderStandardBlock(block, x, y, z);
+
 		return true;
 	}
 

@@ -3,17 +3,13 @@ package com.hbm.main;
 import com.hbm.blocks.ICustomBlockHighlight;
 import com.hbm.config.ClientConfig;
 import com.hbm.config.RadiationConfig;
-import com.hbm.dim.WorldProviderCelestial;
-import com.hbm.extprop.HbmLivingProps;
 import com.hbm.handler.pollution.PollutionHandler.PollutionType;
 import com.hbm.items.armor.IArmorDisableModel;
 import com.hbm.items.armor.IArmorDisableModel.EnumPlayerPart;
 import com.hbm.items.weapon.sedna.ItemGunBaseNT;
-import com.hbm.items.armor.ItemModOxy;
 import com.hbm.packet.PermaSyncHandler;
 import com.hbm.render.item.weapon.sedna.ItemRenderWeaponBase;
 import com.hbm.render.model.ModelMan;
-import com.hbm.util.ArmorUtil;
 import com.hbm.world.biome.BiomeGenCraterBase;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -23,10 +19,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.RenderBlocks;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.settings.GameSettings;
@@ -37,11 +31,9 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.IItemRenderer;
 import net.minecraftforge.client.IItemRenderer.ItemRenderType;
 import net.minecraftforge.client.MinecraftForgeClient;
@@ -369,7 +361,7 @@ public class ModEventHandlerRenderer {
 	public void onDrawHighlight(DrawBlockHighlightEvent event) {
 		MovingObjectPosition mop = event.target;
 
-		if(mop != null && mop.typeOfHit == MovingObjectType.BLOCK) {
+		if(mop != null && mop.typeOfHit == mop.typeOfHit.BLOCK) {
 			Block b = event.player.worldObj.getBlock(mop.blockX, mop.blockY, mop.blockZ);
 			if(b instanceof ICustomBlockHighlight) {
 				ICustomBlockHighlight cus = (ICustomBlockHighlight) b;
@@ -382,12 +374,82 @@ public class ModEventHandlerRenderer {
 		}
 	}
 
+	//private ResourceLocation ashes = new ResourceLocation(RefStrings.MODID + ":textures/misc/overlay_ash.png");
+	public static int currentBrightness = 0;
+	public static int lastBrightness = 0;
+
+	/*@SubscribeEvent
+	public void onOverlayRender(RenderGameOverlayEvent.Pre event) {
+
+		if(event.type == ElementType.PORTAL) {
+
+			Minecraft mc = Minecraft.getMinecraft();
+
+			ScaledResolution resolution = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+
+			GL11.glPushMatrix();
+			GL11.glDisable(GL11.GL_DEPTH_TEST);
+			GL11.glDepthMask(false);
+			GL11.glEnable(GL11.GL_BLEND);
+			OpenGlHelper.glBlendFunc(770, 771, 1, 0);
+			GL11.glEnable(GL11.GL_ALPHA_TEST);
+			GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.0F);
+
+			int w = resolution.getScaledWidth();
+			int h = resolution.getScaledHeight();
+			double off = System.currentTimeMillis() / 10000D % 10000D;
+			double aw = 1;
+
+			Tessellator tessellator = Tessellator.instance;
+
+			int cX = currentBrightness % 65536;
+			int cY = currentBrightness / 65536;
+			int lX = lastBrightness % 65536;
+			int lY = lastBrightness / 65536;
+			float interp = (mc.theWorld.getTotalWorldTime() % 20) * 0.05F;
+
+			if(mc.theWorld.getTotalWorldTime() == 1)
+				lastBrightness = currentBrightness;
+
+			OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) (lX + (cX - lX) * interp) / 1.0F, (float) (lY + (cY - lY) * interp) / 1.0F);
+
+			// mc.entityRenderer.enableLightmap((double)event.partialTicks);
+
+			mc.getTextureManager().bindTexture(ashes);
+
+			for(int i = 1; i < 3; i++) {
+
+				GL11.glTranslated(w, h, 0);
+				GL11.glRotatef(-15, 0, 0, 1);
+				GL11.glTranslated(-w, -h, 0);
+				GL11.glColor4f(1.0F, 1.0F, 1.0F, BlockAshes.ashes / 256F * 0.98F / i);
+
+				tessellator.startDrawingQuads();
+				tessellator.addVertexWithUV(-w * 1.25, h * 1.25, aw, 0.0D + off * i, 1.0D);
+				tessellator.addVertexWithUV(w * 1.25, h * 1.25, aw, 1.0D + off * i, 1.0D);
+				tessellator.addVertexWithUV(w * 1.25, -h * 1.25, aw, 1.0D + off * i, 0.0D);
+				tessellator.addVertexWithUV(-w * 1.25, -h * 1.25, aw, 0.0D + off * i, 0.0D);
+				tessellator.draw();
+			}
+
+			mc.entityRenderer.disableLightmap((double) event.partialTicks);
+
+			GL11.glDepthMask(true);
+			GL11.glEnable(GL11.GL_DEPTH_TEST);
+			GL11.glDisable(GL11.GL_BLEND);
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			GL11.glAlphaFunc(GL11.GL_GEQUAL, 0.1F);
+
+			GL11.glPopMatrix();
+		}
+	}*/
+
 	float renderSoot = 0;
 
 	@SubscribeEvent
 	public void worldTick(WorldTickEvent event) {
 
-		if(event.phase == WorldTickEvent.Phase.START && RadiationConfig.enableSootFog) {
+		if(event.phase == event.phase.START && RadiationConfig.enableSootFog) {
 
 			float step = 0.05F;
 			float soot = PermaSyncHandler.pollution[PollutionType.SOOT.ordinal()];
@@ -402,29 +464,9 @@ public class ModEventHandlerRenderer {
 		}
 	}
 
-	public static float lastFogDensity;
-
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public void thickenFog(FogDensity event) {
-		if(event.entity.worldObj.provider instanceof WorldProviderCelestial) {
-			WorldProviderCelestial provider = (WorldProviderCelestial) event.entity.worldObj.provider;
-			lastFogDensity = provider.fogDensity(event);
-			
-			if(lastFogDensity > 0) {
-				if(GLContext.getCapabilities().GL_NV_fog_distance) {
-					GL11.glFogi(34138, 34139);
-				}
-				GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);
-	
-				event.density = lastFogDensity;
-				event.setCanceled(true);
-
-				return;
-			}
-		}
-
 		float soot = (float) (renderSoot - RadiationConfig.sootFogThreshold);
-
 		if(soot > 0 && RadiationConfig.enableSootFog) {
 
 			float farPlaneDistance = (float) (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * 16);
@@ -435,7 +477,8 @@ public class ModEventHandlerRenderer {
 			if(GLContext.getCapabilities().GL_NV_fog_distance) {
 				GL11.glFogi(34138, 34139);
 			}
-			
+			//GL11.glFogi(GL11.GL_FOG_MODE, GL11.GL_EXP);
+			//GL11.glFogf(GL11.GL_FOG_DENSITY, 2F);
 			event.setCanceled(true);
 		}
 	}
@@ -464,6 +507,17 @@ public class ModEventHandlerRenderer {
 		}
 	}
 
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void onRenderHUD(RenderGameOverlayEvent.Pre event) {
+
+		if(event.type == ElementType.HOTBAR && (ModEventHandlerClient.shakeTimestamp + ModEventHandlerClient.shakeDuration - System.currentTimeMillis()) > 0 && ClientConfig.NUKE_HUD_SHAKE.get()) {
+			double mult = (ModEventHandlerClient.shakeTimestamp + ModEventHandlerClient.shakeDuration - System.currentTimeMillis()) / (double) ModEventHandlerClient.shakeDuration * 2;
+			double horizontal = MathHelper.clamp_double(Math.sin(System.currentTimeMillis() * 0.02), -0.7, 0.7) * 15;
+			double vertical = MathHelper.clamp_double(Math.sin(System.currentTimeMillis() * 0.01 + 2), -0.7, 0.7) * 3;
+			GL11.glTranslated(horizontal * mult, vertical * mult, 0);
+		}
+	}
+
 	@SubscribeEvent
 	public void onRenderHand(RenderHandEvent event) {
 
@@ -480,73 +534,6 @@ public class ModEventHandlerRenderer {
 		}
 	}
 
-	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void onRenderHUD(RenderGameOverlayEvent.Pre event) {
-		Tessellator tess = Tessellator.instance;
-		
-		if(event.type == ElementType.HOTBAR && (ModEventHandlerClient.shakeTimestamp + ModEventHandlerClient.shakeDuration - System.currentTimeMillis()) > 0 && ClientConfig.NUKE_HUD_SHAKE.get()) {
-			double mult = (ModEventHandlerClient.shakeTimestamp + ModEventHandlerClient.shakeDuration - System.currentTimeMillis()) / (double) ModEventHandlerClient.shakeDuration * 2;
-			double horizontal = MathHelper.clamp_double(Math.sin(System.currentTimeMillis() * 0.02), -0.7, 0.7) * 15;
-			double vertical = MathHelper.clamp_double(Math.sin(System.currentTimeMillis() * 0.01 + 2), -0.7, 0.7) * 3;
-			GL11.glTranslated(horizontal * mult, vertical * mult, 0);
-		} else if(event.type == ElementType.AIR) {
-			EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-			int width = event.resolution.getScaledWidth();
-			int height = event.resolution.getScaledHeight();
-
-			// If we're suffocating for a reason other than water, render the HUD bubbles
-			int air = HbmLivingProps.getOxy(player);
-			if(air < 100) {
-				GuiIngame gui = Minecraft.getMinecraft().ingameGUI;
-	
-				GL11.glEnable(GL11.GL_BLEND);
-				int left = width / 2 + 91;
-				int top = height - GuiIngameForge.right_height;
-	
-				int full = MathHelper.ceiling_double_int((double)(air - 2) * 10.0D / 100.0D);
-				int partial = MathHelper.ceiling_double_int((double)air * 10.0D / 100.0D) - full;
-
-				for(int i = 0; i < full + partial; ++i) {
-					gui.drawTexturedModalRect(left - i * 8 - 9, top, (i < full ? 16 : 25), 18, 9, 9);
-				}
-				GuiIngameForge.right_height += 10;
-	
-				GL11.glDisable(GL11.GL_BLEND);
-	
-				// Prevent regular bubbles rendering
-				event.setCanceled(true);
-			}
-
-			ItemStack tankStack = ArmorUtil.getOxygenTank(player);
-			if(tankStack != null) {
-				ItemModOxy tank = (ItemModOxy)tankStack.getItem();
-				
-				float tot = (float)ItemModOxy.getFuel(tankStack) / (float)tank.getMaxFuel();
-				
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				int right = width / 2 + 91;
-				int top = height - GuiIngameForge.right_height + 3;
-				tess.startDrawingQuads();
-				tess.setColorOpaque_F(0.25F, 0.25F, 0.25F);
-				tess.addVertex(right - 81.5, top - 0.5, 0);
-				tess.addVertex(right - 81.5, top + 4.5, 0);
-				tess.addVertex(right + 0.5, top + 4.5, 0);
-				tess.addVertex(right + 0.5, top - 0.5, 0);
-				tess.setColorOpaque_F(1F - tot, tot, tot);
-				tess.addVertex(right - 81 * tot, top, 0);
-				tess.addVertex(right - 81 * tot, top + 4, 0);
-				tess.addVertex(right, top + 4, 0);
-				tess.addVertex(right, top, 0);
-				tess.draw();
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-				
-				GuiIngameForge.right_height += 6;
-				event.setCanceled(true);
-			}
-		}
-
-	}
-	
 	private static boolean fogInit = false;
 	private static int fogX;
 	private static int fogZ;

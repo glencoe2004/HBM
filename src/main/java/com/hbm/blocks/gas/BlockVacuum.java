@@ -20,7 +20,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 public class BlockVacuum extends Block {
 
 	public BlockVacuum() {
-		super(Material.air);
+		super(ModBlocks.materialGas);
 		this.setHardness(0.0F);
 		this.setResistance(0.0F);
 	}
@@ -78,6 +78,7 @@ public class BlockVacuum extends Block {
 
 	@Override
 	public void updateTick(World world, int x, int y, int z, Random rand) {
+		
 		for(ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
 			
 			Block b = world.getBlock(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);

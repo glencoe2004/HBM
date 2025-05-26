@@ -9,7 +9,6 @@ import java.util.Set;
 import com.hbm.config.ToolConfig;
 import com.hbm.explosion.ExplosionNT;
 import com.hbm.explosion.ExplosionNT.ExAttrib;
-import com.hbm.inventory.OreDictManager;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.recipes.CentrifugeRecipes;
 import com.hbm.inventory.recipes.CrystallizerRecipes;
@@ -27,12 +26,10 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.oredict.OreDictionary;
 
 public abstract class ToolAbility {
 
@@ -51,27 +48,15 @@ public abstract class ToolAbility {
 			this.radius = radius;
 		}
 		
-		private Set<ThreeInts> pos = new HashSet<>();
+		private Set<ThreeInts> pos = new HashSet();
 
 		@Override
 		public boolean onDig(World world, int x, int y, int z, EntityPlayer player, Block block, int meta, IItemAbility tool) {
 			
 			Block b = world.getBlock(x, y, z);
-			
-			if(!ToolConfig.recursiveStone) {
-				Item item = Item.getItemFromBlock(b);
-				List<ItemStack> stone = OreDictionary.getOres(OreDictManager.KEY_STONE);
-				for(ItemStack stack : stone) {
-					if(stack.getItem() == item)
-						return false;
-				}
-				List<ItemStack> cobble = OreDictionary.getOres(OreDictManager.KEY_COBBLESTONE);
-				for(ItemStack stack : cobble) {
-					if(stack.getItem() == item)
-						return false;
-				}
-			}
 
+			if(b == Blocks.stone && !ToolConfig.recursiveStone)
+				return false;
 			if(b == Blocks.netherrack && !ToolConfig.recursiveNetherrack)
 				return false;
 			
@@ -201,62 +186,6 @@ public abstract class ToolAbility {
 		@Override
 		public String getName() {
 			return "tool.ability.hammer";
-		}
-
-		@Override
-		public String getFullName() {
-			return I18n.format(getName()) + getExtension();
-		}
-
-		@Override
-		public String getExtension() {
-			return " (" + range + ")";
-		}
-
-		@Override
-		public boolean isAllowed() {
-			return ToolConfig.abilityHammer;
-		}
-	}
-	public static class HammerSilkAbility extends ToolAbility {
-
-		int range;
-		
-		public HammerSilkAbility(int range) {
-			this.range = range;
-		}
-		
-		@Override
-		public boolean onDig(World world, int x, int y, int z, EntityPlayer player, Block block, int meta, IItemAbility tool) {
-			if(EnchantmentHelper.getSilkTouchModifier(player) || player.getHeldItem() == null)
-				return false;
-			
-			ItemStack stack = player.getHeldItem();
-			EnchantmentUtil.addEnchantment(stack, Enchantment.silkTouch, 1);
-			
-			for(int a = x - range; a <= x + range; a++) {
-				for(int b = y - range; b <= y + range; b++) {
-					for(int c = z - range; c <= z + range; c++) {
-						
-						if(a == x && b == y && c == z)
-							continue;
-						
-						tool.breakExtraBlock(world, a, b ,c, player, x, y, z);
-					}
-				}
-			}
-			if(player instanceof EntityPlayerMP)
-				IItemAbility.standardDigPost(world, x, y, z, (EntityPlayerMP) player);
-			
-			EnchantmentUtil.removeEnchantment(stack, Enchantment.silkTouch);
-			
-			return false;
-			
-		}
-
-		@Override
-		public String getName() {
-			return "tool.ability.hammersilk";
 		}
 
 		@Override
@@ -455,7 +384,6 @@ public abstract class ToolAbility {
 			return ToolConfig.abilityShredder;
 		}
 	}
-	
 	
 	public static class CentrifugeAbility extends ToolAbility {
 

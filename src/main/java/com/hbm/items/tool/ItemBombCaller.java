@@ -37,9 +37,6 @@ public class ItemBombCaller extends Item {
 			case 5: list.add("Type: VT stinger rockets"); break;
 			case 6: list.add("Type: PIP OH GOD"); break;
 			case 7: list.add("Type: Cloud the cloud oh god the cloud"); break;
-			case 8: list.add("Civilian Airliner."); break;
-			default: list.add("Type: INVALID, Report it to mod creator");
-
 		}
 	}
 
@@ -50,11 +47,8 @@ public class ItemBombCaller extends Item {
 		int x = pos.blockX;
 		int y = pos.blockY;
 		int z = pos.blockZ;
-		
-		boolean b = false;
-		boolean b2 = false;
-		
-	    if(!world.isRemote)
+
+		if(!world.isRemote)
 		{
 			EntityBomber bomber;
 			switch(stack.getItemDamage()) {
@@ -66,19 +60,12 @@ public class ItemBombCaller extends Item {
 				case 5: bomber = EntityBomber.statFacStinger(world, x, y, z); break;
 				case 6: bomber = EntityBomber.statFacBoxcar(world, x, y, z); break;
 				case 7: bomber = EntityBomber.statFacPC(world, x, y, z); break;
-				case 8: bomber = EntityBomber.statFacCV(world, x, y, z);
-				b2 = true; break;
 				default: bomber = EntityBomber.statFacCarpet(world, x, y, z);
 
 			}
 			WorldUtil.loadAndSpawnEntityInWorld(bomber);
 			player.addChatMessage(new ChatComponentText("Called in airstrike!"));
 			world.playSoundAtEntity(player, "hbm:item.techBleep", 1.0F, 1.0F);
-
-			if(b2){
-		    	player.addChatMessage(new ChatComponentText("Rerouted Civilian Traffic!"));
-		        world.playSoundAtEntity(player, "hbm:item.techBleep", 1.0F, 1.0F);
-			}
 
 		}
 
@@ -96,7 +83,6 @@ public class ItemBombCaller extends Item {
 		p_150895_3_.add(new ItemStack(p_150895_1_, 1, 2));
 		p_150895_3_.add(new ItemStack(p_150895_1_, 1, 3));
 		p_150895_3_.add(new ItemStack(p_150895_1_, 1, 4));
-		p_150895_3_.add(new ItemStack(p_150895_1_, 1, 8));
 	}
 
 	@Override

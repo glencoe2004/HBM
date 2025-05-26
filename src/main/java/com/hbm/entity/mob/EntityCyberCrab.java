@@ -3,7 +3,6 @@ package com.hbm.entity.mob;
 import com.hbm.entity.projectile.EntityBullet;
 import com.hbm.lib.ModDamageSource;
 
-import api.hbm.entity.ISuffocationImmune;
 import api.hbm.entity.IRadiationImmune;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
@@ -22,7 +21,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
-public class EntityCyberCrab extends EntityMob implements IRangedAttackMob, IRadiationImmune, ISuffocationImmune {
+public class EntityCyberCrab extends EntityMob implements IRangedAttackMob, IRadiationImmune {
 
 	private static final IEntitySelector selector = new IEntitySelector() {
 		public boolean isEntityApplicable(Entity p_82704_1_) {

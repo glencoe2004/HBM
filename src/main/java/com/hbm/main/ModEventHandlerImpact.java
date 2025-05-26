@@ -1,11 +1,10 @@
 package com.hbm.main;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.entity.projectile.EntityTom;
-import com.hbm.handler.BossSpawnHandler;
+import com.hbm.config.GeneralConfig;
 import com.hbm.handler.ImpactWorldHandler;
 import com.hbm.saveddata.TomSaveData;
-
+import com.hbm.world.WorldProviderNTM;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -20,8 +19,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.CheckSpawn;
 import net.minecraftforge.event.terraingen.BiomeEvent;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
@@ -31,7 +30,6 @@ import net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate;
 import net.minecraftforge.event.world.WorldEvent;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -62,31 +60,6 @@ public class ModEventHandlerImpact {
 				data.markDirty();
 			}
 
-			if(data.time > 0) {
-				data.time--;
-				if(data.time<=2400)
-				{
-					List<EntityPlayer> entities = event.world.playerEntities;
-					for(Iterator<EntityPlayer> en = new ArrayList<>(entities).iterator() ; en.hasNext();) {
-						EntityPlayer e = en.next();
-						Random rand = new Random();
-						if(rand.nextInt(100)==0)
-						{
-							BossSpawnHandler.spawnMeteorAtPlayer(e, false, true);
-						}
-					}
-				}
-				if(data.time==data.dtime)
-				{
-					EntityTom tom = new EntityTom(event.world);
-					tom.setPosition(data.x + 0.5, 600, data.z + 0.5);
-					event.world.spawnEntityInWorld(tom);
-					IChunkProvider provider = event.world.getChunkProvider();
-					provider.loadChunk(data.x >> 4, data.z >> 4);
-				}
-				data.markDirty();
-			}
-
 			if(!event.world.loadedEntityList.isEmpty()) {
 
 				List<Object> oList = new ArrayList<Object>();
@@ -96,7 +69,9 @@ public class ModEventHandlerImpact {
 					if(e instanceof EntityLivingBase) {
 						EntityLivingBase entity = (EntityLivingBase) e;
 
-						if(data.fire > 0 && data.dust < 0.75f && event.world.getSavedLightValue(EnumSkyBlock.Sky, (int) entity.posX, (int) entity.posY, (int) entity.posZ) > 7) {
+						if(entity.worldObj.provider.dimensionId == 0 && data.fire > 0 && data.dust < 0.75f &&
+								event.world.getSavedLightValue(EnumSkyBlock.Sky, (int) entity.posX, (int) entity.posY, (int) entity.posZ) > 7) {
+
 							entity.setFire(5);
 							entity.attackEntityFrom(DamageSource.onFire, 2);
 						}
@@ -126,9 +101,11 @@ public class ModEventHandlerImpact {
 
 		if(data.impact) {
 			if(!(event.entityLiving instanceof EntityPlayer) && event.entityLiving instanceof EntityLivingBase) {
-				if(event.entityLiving.height >= 0.85F || event.entityLiving.width >= 0.85F && !(event.entity instanceof EntityWaterMob) && !event.entityLiving.isChild()) {
-					event.setResult(Result.DENY);
-					event.entityLiving.setDead();
+				if(event.world.provider.dimensionId == 0) {
+					if(event.entityLiving.height >= 0.85F || event.entityLiving.width >= 0.85F && !(event.entity instanceof EntityWaterMob) && !event.entityLiving.isChild()) {
+						event.setResult(Result.DENY);
+						event.entityLiving.setDead();
+					}
 				}
 				if(event.entityLiving instanceof EntityWaterMob) {
 					Random rand = new Random();
@@ -148,7 +125,7 @@ public class ModEventHandlerImpact {
 
 			TomSaveData data = TomSaveData.forWorld(event.world);
 
-			if(data.impact) { // OHHH THIS IS WHAT I WAS FUCKING MISSING. WHY FORGE WHY???? WHY THE FUCK DID YOU ADVERTISE THE CANCELSPAWN EVENTHANDLER WHEN THIS EXISTS???
+			if(data.impact) {
 				event.setResult(Result.DENY);
 			}
 		}
@@ -156,7 +133,13 @@ public class ModEventHandlerImpact {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public void onLoad(WorldEvent.Load event) {
+
 		TomSaveData.resetLastCached();
+
+		if(GeneralConfig.enableImpactWorldProvider) {
+			DimensionManager.unregisterProviderType(0);
+			DimensionManager.registerProviderType(0, WorldProviderNTM.class, true);
+		}
 	}
 
 	@SubscribeEvent
@@ -229,8 +212,7 @@ public class ModEventHandlerImpact {
 
 			} else if(data.dust == 0 && data.fire == 0) {
 				if(type == event.type.TREE || type == event.type.BIG_SHROOM || type == event.type.CACTUS) {
-					Random rand = new Random();
-					if(rand.nextInt(4) == 0) {
+					if(event.world.rand.nextInt(9) == 0) {
 						event.setResult(Result.DEFAULT);
 					} else {
 						event.setResult(Result.DENY);
@@ -247,6 +229,10 @@ public class ModEventHandlerImpact {
 		}
 	}
 
+	@SubscribeEvent
+	public void populateChunkPre(PopulateChunkEvent.Pre event) {
+		TomSaveData.forWorld(event.world); /* forces the data to be cached so it is accurate by the time ModEventHandlerImpact#modifyVillageGen is called. */
+	}
 
 	@SubscribeEvent
 	public void populateChunkPost(PopulateChunkEvent.Post event) {

@@ -57,8 +57,7 @@ public abstract class TileEntityFireboxBase extends TileEntityMachinePolluting i
 	public void updateEntity() {
 		
 		if(!worldObj.isRemote) {
-			boolean canOperate = false;
-
+			
 			for(int i = 2; i < 6; i++) {
 				ForgeDirection dir = ForgeDirection.getOrientation(i);
 				ForgeDirection rot = dir.getRotation(ForgeDirection.UP);
@@ -71,7 +70,6 @@ public abstract class TileEntityFireboxBase extends TileEntityMachinePolluting i
 			wasOn = false;
 			
 			if(burnTime <= 0) {
-				canOperate = breatheAir(0);
 				
 				for(int i = 0; i < 2; i++) {
 					if(slots[i] != null) {
@@ -85,7 +83,7 @@ public abstract class TileEntityFireboxBase extends TileEntityMachinePolluting i
 							
 							if(below instanceof TileEntityAshpit) {
 								TileEntityAshpit ashpit = (TileEntityAshpit) below;
-								EnumAshType type = getAshFromFuel(slots[i]);
+								EnumAshType type = this.getAshFromFuel(slots[i]);
 								if(type == EnumAshType.WOOD) ashpit.ashLevelWood += baseTime;
 								if(type == EnumAshType.COAL) ashpit.ashLevelCoal += baseTime;
 								if(type == EnumAshType.MISC) ashpit.ashLevelMisc += baseTime;
@@ -105,24 +103,15 @@ public abstract class TileEntityFireboxBase extends TileEntityMachinePolluting i
 					}
 				} 
 			} else {
+				
 				if(this.heatEnergy < getMaxHeat()) {
-					// firebox consumes 1mB every 5 ticks, heating oven every tick
-					canOperate = breatheAir(worldObj.getTotalWorldTime() % (500 / getBaseHeat()) == 0 ? 1 : 0);
-
-					if(canOperate) {
-						burnTime--;
-						if(worldObj.getTotalWorldTime() % 20 == 0) this.pollute(PollutionType.SOOT, PollutionHandler.SOOT_PER_SECOND * 3);
-					}
-				} else {
-					canOperate = breatheAir(0);
+					burnTime--;
+					if(worldObj.getTotalWorldTime() % 20 == 0) this.pollute(PollutionType.SOOT, PollutionHandler.SOOT_PER_SECOND * 3);
 				}
-
-				if(canOperate) {
-					this.wasOn = true;
-					
-					if(worldObj.rand.nextInt(15) == 0 && !this.muffled) {
-						worldObj.playSoundEffect(xCoord, yCoord, zCoord, "fire.fire", 1.0F, 0.5F + worldObj.rand.nextFloat() * 0.5F);
-					}
+				this.wasOn = true;
+				
+				if(worldObj.rand.nextInt(15) == 0 && !this.muffled) {
+					worldObj.playSoundEffect(xCoord, yCoord, zCoord, "fire.fire", 1.0F, 0.5F + worldObj.rand.nextFloat() * 0.5F);
 				}
 			}
 			
@@ -130,7 +119,7 @@ public abstract class TileEntityFireboxBase extends TileEntityMachinePolluting i
 				this.heatEnergy = Math.min(this.heatEnergy + this.burnHeat, getMaxHeat());
 			} else {
 				this.heatEnergy = Math.max(this.heatEnergy - Math.max(this.heatEnergy / 1000, 1), 0);
-				if(canOperate) this.burnHeat = 0;
+				this.burnHeat = 0;
 			}
 			
 			this.networkPackNT(50);

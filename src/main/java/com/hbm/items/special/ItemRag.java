@@ -2,7 +2,6 @@ package com.hbm.items.special;
 
 import java.util.List;
 
-import com.hbm.extprop.HbmLivingProps;
 import com.hbm.items.ModItems;
 
 import net.minecraft.block.material.Material;
@@ -32,16 +31,10 @@ public class ItemRag extends Item {
 	@Override
 	public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player) {
 		
-		if(HbmLivingProps.getRadiation(player) > 500) {
-			stack.stackSize--;
-			player.inventory.addItemStackToInventory(new ItemStack(ModItems.rag_blood));
-			return stack;
-		}
-		else {
-			stack.stackSize--;
-			player.inventory.addItemStackToInventory(new ItemStack(ModItems.rag_piss));
-			return stack;	
-		}
+		stack.stackSize--;
+		player.inventory.addItemStackToInventory(new ItemStack(ModItems.rag_piss));
+		
+		return stack;
 	}
 	
 	@Override

@@ -2,16 +2,9 @@ package com.hbm.blocks.generic;
 
 import java.util.Random;
 
-import org.lwjgl.opengl.GL11;
-
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.RefStrings;
-import com.hbm.render.util.BeamPronter;
-import com.hbm.render.util.BeamPronter.EnumBeamType;
-import com.hbm.render.util.BeamPronter.EnumWaveType;
 import com.hbm.tileentity.deco.TileEntityGeysir;
-import com.hbm.tileentity.machine.TileEntityHadron.Particle;
-import com.hbm.util.ParticleUtil;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -22,7 +15,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class BlockGeysir extends BlockContainer {
@@ -81,13 +73,6 @@ public class BlockGeysir extends BlockContainer {
 		if(this == ModBlocks.geysir_nether) {
 			p_149734_1_.spawnParticle("flame", x + 0.5F, y + 1.0625F, z + 0.5F, 0.0D, 0.0D, 0.0D);
 		}
-		
-		if(this == ModBlocks.geysir_volcanic) {
-			ParticleUtil.spawnGasFlame(p_149734_1_, x + p_149734_1_.rand.nextDouble(), y + 0.5 + p_149734_1_.rand.nextDouble(), z + p_149734_1_.rand.nextDouble(), p_149734_1_.rand.nextGaussian() * 0.2, 0.1, p_149734_1_.rand.nextGaussian() * 0.2);
-		}
-		
-		
 	}
-	
 
 }

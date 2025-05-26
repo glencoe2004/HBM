@@ -71,7 +71,6 @@ public class TileEntityMachinePumpSteam extends TileEntityMachinePumpBase {
 	protected void operate() {
 		steam.setFill(steam.getFill() - 100);
 		lps.setFill(lps.getFill() + 1);
-		int pumpSpeed = water.getTankType() == Fluids.WATER ? steamSpeed : steamSpeed / nonWaterDebuff;
-		water.setFill(Math.min(water.getFill() + pumpSpeed, water.getMaxFill()));
+		water.setFill(Math.min(water.getFill() + steamSpeed, water.getMaxFill()));
 	}
 }

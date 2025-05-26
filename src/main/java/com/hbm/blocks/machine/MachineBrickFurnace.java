@@ -1,7 +1,6 @@
 package com.hbm.blocks.machine;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.handler.atmosphere.IBlockSealable;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
 import com.hbm.tileentity.machine.TileEntityFurnaceBrick;
@@ -24,7 +23,7 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class MachineBrickFurnace extends BlockContainer implements IBlockSealable {
+public class MachineBrickFurnace extends BlockContainer {
 
 	private final Random rand = new Random();
 	private final boolean isActive;
@@ -168,10 +167,5 @@ public class MachineBrickFurnace extends BlockContainer implements IBlockSealabl
 				world.spawnParticle("flame", cX + var, cY, cZ + off, 0.0D, 0.0D, 0.0D);
 			}
 		}
-	}
-
-	@Override
-	public boolean isSealed(World world, int x, int y, int z) {
-		return false;
 	}
 }

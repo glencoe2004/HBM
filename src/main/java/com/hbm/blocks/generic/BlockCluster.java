@@ -10,6 +10,7 @@ import com.hbm.util.I18nUtil;
 
 import api.hbm.block.IDrillInteraction;
 import api.hbm.block.IMiningDrill;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,7 +20,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 
-public class BlockCluster extends BlockOre implements IDrillInteraction, ITooltipProvider {
+public class BlockCluster extends Block implements IDrillInteraction, ITooltipProvider {
 
 	public BlockCluster(Material mat) {
 		super(mat);
@@ -56,6 +57,7 @@ public class BlockCluster extends BlockOre implements IDrillInteraction, IToolti
 	}
 	
 	private Item getDrop() {
+
 		if(this == ModBlocks.cluster_iron)		return ModItems.crystal_iron;
 		if(this == ModBlocks.cluster_titanium)	return ModItems.crystal_titanium;
 		if(this == ModBlocks.cluster_aluminium)	return ModItems.crystal_aluminium;

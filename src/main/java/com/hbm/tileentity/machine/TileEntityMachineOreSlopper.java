@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.hbm.blocks.ModBlocks;
-import com.hbm.dim.CelestialBody;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.inventory.UpgradeManagerNT;
 import com.hbm.inventory.container.ContainerOreSlopper;
@@ -17,8 +16,7 @@ import com.hbm.items.machine.ItemMachineUpgrade.UpgradeType;
 import com.hbm.items.special.ItemBedrockOreBase;
 import com.hbm.items.special.ItemBedrockOreNew;
 import com.hbm.items.special.ItemBedrockOreNew.BedrockOreGrade;
-import com.hbm.items.special.ItemBedrockOreNew.CelestialBedrockOre;
-import com.hbm.items.special.ItemBedrockOreNew.CelestialBedrockOreType;
+import com.hbm.items.special.ItemBedrockOreNew.BedrockOreType;
 import com.hbm.lib.Library;
 import com.hbm.lib.ModDamageSource;
 import com.hbm.main.MainRegistry;
@@ -74,8 +72,7 @@ public class TileEntityMachineOreSlopper extends TileEntityMachineBase implement
 	public int delay;
 
 	public FluidTank[] tanks;
-	public double[] ores = new double[CelestialBedrockOre.getAllTypes().size()];
-	private CelestialBody fromBody;
+	public double[] ores = new double[BedrockOreType.values().length];
 
 	public UpgradeManagerNT upgradeManager = new UpgradeManagerNT();
 
@@ -131,10 +128,8 @@ public class TileEntityMachineOreSlopper extends TileEntityMachineBase implement
 				while(progress >= 1F && canSlop()) {
 					progress -= 1F;
 
-					fromBody = ItemBedrockOreBase.getOreBody(slots[2]);
-
-					for(CelestialBedrockOreType type : CelestialBedrockOre.get(fromBody.getEnum()).types) {
-						ores[type.index] += (ItemBedrockOreBase.getOreAmount(slots[2], type) * (1D + efficiency * 0.1));
+					for(BedrockOreType type : BedrockOreType.values()) {
+						ores[type.ordinal()] += (ItemBedrockOreBase.getOreAmount(slots[2], type) * (1D + efficiency * 0.1));
 					}
 
 					this.decrStackSize(2, 1);
@@ -165,14 +160,14 @@ public class TileEntityMachineOreSlopper extends TileEntityMachineBase implement
 				this.progress = 0;
 			}
 
-			for(CelestialBedrockOreType type : CelestialBedrockOre.getAllTypes()) {
+			for(BedrockOreType type : BedrockOreType.values()) {
 				ItemStack output = ItemBedrockOreNew.make(BedrockOreGrade.BASE, type);
-				outer: while(ores[type.index] >= 1) {
+				outer: while(ores[type.ordinal()] >= 1) {
 					for(int i = 3; i <= 8; i++) if(slots[i] != null && slots[i].getItem() == output.getItem() && slots[i].getItemDamage() == output.getItemDamage() && slots[i].stackSize < output.getMaxStackSize()) {
-						slots[i].stackSize++; ores[type.index] -= 1F; continue outer;
+						slots[i].stackSize++; ores[type.ordinal()] -= 1F; continue outer;
 					}
 					for(int i = 3; i <= 8; i++) if(slots[i] == null) {
-						slots[i] = output; ores[type.index] -= 1F; continue outer;
+						slots[i] = output; ores[type.ordinal()] -= 1F; continue outer;
 					}
 					break outer;
 				}

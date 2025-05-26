@@ -341,7 +341,6 @@ public class GUIRBMKConsole extends GuiScreen {
 			switch(col.type) {
 			case ABSORBER: break;
 			case BLANK: break;
-			case BURNER: break;
 			case MODERATOR: break;
 			case REFLECTOR: break;
 			case OUTGASSER: break;

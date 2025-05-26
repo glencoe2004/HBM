@@ -45,8 +45,6 @@ public class RenderAccessoryUtility {
 	//private static ResourceLocation pheo = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapePheo.png");
 	private static ResourceLocation vaer = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapeVaer.png");
 	private static ResourceLocation adam = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapeAdam.png");
-	private static ResourceLocation gwen = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapeGwen.png");
-
 	private static ResourceLocation alcater = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapeAlcater.png");
 	private static ResourceLocation jame = new ResourceLocation(RefStrings.MODID + ":textures/models/capes/CapeJame.png");
 	
@@ -137,8 +135,8 @@ public class RenderAccessoryUtility {
 		if(ShadyUtil.contributors.contains(uuid)) {
 			return wiki;
 		}
-		if(uuid.equals(ShadyUtil.DUODEC_)) {
-			return gwen;
+		if(name.startsWith("Player")) {
+			return test;
 		}
 		
 		return null;

@@ -15,7 +15,6 @@ import com.hbm.util.ContaminationUtil;
 import com.hbm.util.ContaminationUtil.ContaminationType;
 import com.hbm.util.ContaminationUtil.HazardType;
 
-import api.hbm.entity.ISuffocationImmune;
 import api.hbm.entity.IRadiationImmune;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.relauncher.Side;
@@ -37,7 +36,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 
-public class EntityUFO extends EntityFlying implements IMob, IBossDisplayData, IRadiationImmune, ISuffocationImmune {
+public class EntityUFO extends EntityFlying implements IMob, IBossDisplayData, IRadiationImmune {
 
 	public int courseChangeCooldown;
 	public int scanCooldown;

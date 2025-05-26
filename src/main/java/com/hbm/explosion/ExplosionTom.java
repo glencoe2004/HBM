@@ -133,20 +133,17 @@ public class ExplosionTom {
 							worldObj.setBlock(pX, y, pZ, Blocks.air, 0, 2);
 						}
 					} else {
-						if(distance < 500) 
-						{
-							for(int i = -2; i < 3; i++) {
-								for(int j = -2; j < 3; j++) {
-									for(int k = -2; k < 3; k++) {
-										if(worldObj.getBlock(pX + i, y + j, pZ + k).getMaterial() == Material.water || worldObj.getBlock(pX + i, y + j, pZ + k).getMaterial() == Material.ice || worldObj.getBlock(pX + i, y, pZ + k) == Blocks.air) {
-											worldObj.setBlock(pX + i, y, pZ + k, Blocks.lava, 0, 2);
-											worldObj.setBlock(pX, y, pZ, Blocks.lava, 0, 2);
-										}
+						for(int i = -2; i < 3; i++) {
+							for(int j = -2; j < 3; j++) {
+								for(int k = -2; k < 3; k++) {
+									if(worldObj.getBlock(pX + i, y + j, pZ + k).getMaterial() == Material.water || worldObj.getBlock(pX + i, y + j, pZ + k).getMaterial() == Material.ice || worldObj.getBlock(pX + i, y, pZ + k) == Blocks.air) {
+										worldObj.setBlock(pX + i, y, pZ + k, Blocks.lava, 0, 2);
+										worldObj.setBlock(pX, y, pZ, Blocks.lava, 0, 2);
 									}
 								}
 							}
-							worldObj.setBlock(pX, y, pZ, Blocks.lava, 0, 2);
 						}
+						worldObj.setBlock(pX, y, pZ, Blocks.lava, 0, 2);
 					}
 
 				}

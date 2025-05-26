@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import com.hbm.blocks.ModBlocks;
-import com.hbm.blocks.generic.BlockBobble.BobbleType;
 import com.hbm.lib.RefStrings;
 import com.hbm.main.MainRegistry;
 import com.hbm.util.I18nUtil;
@@ -79,7 +77,6 @@ public class ItemCustomLore extends Item {
 			}
 		}
 	}
-	
 	
 	static int setSize = 0;
 

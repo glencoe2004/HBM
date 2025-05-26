@@ -63,8 +63,8 @@ public class CompatHandler {
                 return Fluids.SUPERHOTSTEAM;
             case(3):
                 return Fluids.ULTRAHOTSTEAM;
-            default:
-                return Fluids.STEAM;
+			default:
+				return Fluids.STEAM;
         }
     }
 

@@ -36,33 +36,28 @@ public class RenderBlockMultipass implements ISimpleBlockRenderingHandler {
 		IBlockMultiPass multi = (IBlockMultiPass) block;
 		
 		for(int i = 0; i < (multi.shouldRenderItemMulti() ? multi.getPasses() : 1); i++) {
-			currentPass = i;
+			this.currentPass = i;
 			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, -1.0F, 0.0F);
 			renderer.renderFaceYNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 0, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 1.0F, 0.0F);
 			renderer.renderFaceYPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 1, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 0.0F, -1.0F);
 			renderer.renderFaceZNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 2, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 0.0F, 1.0F);
 			renderer.renderFaceZPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 3, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(-1.0F, 0.0F, 0.0F);
 			renderer.renderFaceXNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 4, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(1.0F, 0.0F, 0.0F);
 			renderer.renderFaceXPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 5, metadata));
 			tessellator.draw();
@@ -71,9 +66,9 @@ public class RenderBlockMultipass implements ISimpleBlockRenderingHandler {
 		/** terrible hack to make this shit work */
 		/*if(block == ModBlocks.ore_random) {
 
-			currentPass = 1;
+			this.currentPass = 1;
 			renderer.setOverrideBlockTexture(block.getIcon(0, metadata));
-			currentPass = 0;
+			this.currentPass = 0;
 			ComparableStack stack = BlockMotherOfAllOres.itemMap.get(metadata);
 			int color = ColorUtil.getAverageColorFromStack(stack != null ? stack.toStack() : new ItemStack(ModItems.nothing));
 			color = ColorUtil.amplifyColor(color);
@@ -96,29 +91,24 @@ public class RenderBlockMultipass implements ISimpleBlockRenderingHandler {
 			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, -1.0F, 0.0F);
 			renderer.renderFaceYNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 0, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 1.0F, 0.0F);
 			renderer.renderFaceYPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 1, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 0.0F, -1.0F);
 			renderer.renderFaceZNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 2, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(0.0F, 0.0F, 1.0F);
 			renderer.renderFaceZPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 3, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(-1.0F, 0.0F, 0.0F);
 			renderer.renderFaceXNeg(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 4, metadata));
-			//yer welcome to PR an improvement
-			//tessellator.draw();
-			//tessellator.startDrawingQuads();
+			tessellator.draw();
+			tessellator.startDrawingQuads();
 			tessellator.setNormal(1.0F, 0.0F, 0.0F);
 			renderer.renderFaceXPos(block, 0.0D, 0.0D, 0.0D, renderer.getBlockIconFromSideAndMetadata(block, 5, metadata));
 			tessellator.draw();

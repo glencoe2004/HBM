@@ -29,10 +29,7 @@ public class EntityNukeExplosionMK5 extends EntityExplosionChunkloading {
 	public int speed;
 	public int length;
 	
-	
 	public boolean fallout = true;
-	public boolean salted = false;
-
 	private int falloutAdd = 0;
 	
 	ExplosionNukeRayBatched explosion;
@@ -162,12 +159,6 @@ public class EntityNukeExplosionMK5 extends EntityExplosionChunkloading {
 		
 		EntityNukeExplosionMK5 mk5 = statFac(world, r, x, y ,z);
 		mk5.fallout = false;
-		return mk5;
-	}
-	public static EntityNukeExplosionMK5 statFacSalted(World world, int r, double x, double y, double z) {
-		
-		EntityNukeExplosionMK5 mk5 = statFac(world, r, x, y ,z);
-		mk5.salted = true;
 		return mk5;
 	}
 	

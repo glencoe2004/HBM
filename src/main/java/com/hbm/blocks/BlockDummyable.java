@@ -96,22 +96,6 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
 
 		super.updateTick(world, x, y, z, rand);
 
-		if(!internalPlayers.isEmpty()) {
-			boolean anyStillInside = false;
-			for(EntityPlayer player : internalPlayers) {
-				if(isPlayerInside(world, player)) {
-					anyStillInside = true;
-					break;
-				}
-			}
-
-			if(anyStillInside) {
-				world.scheduleBlockUpdate(x, y, z, this, 1);
-			} else {
-				internalPlayers.clear();
-			}
-		}
-
 		if(world.isRemote)
 			return;
 
@@ -168,17 +152,10 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
 	}
 
 	@Override
-	public int onBlockPlaced(World world, int x, int y, int z, int side, float fX, float fY, float fZ, int meta) {
-		return side;
-	}
-
-	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase player, ItemStack itemStack) {
 
 		if(!(player instanceof EntityPlayer))
 			return;
-
-		ForgeDirection placedSide = ForgeDirection.getOrientation(world.getBlockMetadata(x, y, z));
 
 		safeRem = true;
 		world.setBlockToAir(x, y, z);
@@ -187,41 +164,27 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
 		EntityPlayer pl = (EntityPlayer) player;
 
 		int i = MathHelper.floor_double(player.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
-
-		// The direction the player is facing, for offsetting the block away from the player
-		ForgeDirection facingDir = ForgeDirection.NORTH;
-
-		if(placedSide == ForgeDirection.UP || placedSide == ForgeDirection.DOWN) {
-			if(i == 0) facingDir = ForgeDirection.getOrientation(2);
-			if(i == 1) facingDir = ForgeDirection.getOrientation(5);
-			if(i == 2) facingDir = ForgeDirection.getOrientation(3);
-			if(i == 3) facingDir = ForgeDirection.getOrientation(4);
-		} else {
-			facingDir = placedSide;
-		}
-
-		// The direction the final multiblock will be facing
-		ForgeDirection dir = getDirModified(facingDir);
-
 		int o = -getOffset();
+		y += getHeightOffset();
 
-		int ox = x + facingDir.offsetX * o;
-		int oy = y + getHeightOffset();
-		int oz = z + facingDir.offsetZ * o;
+		ForgeDirection dir = ForgeDirection.NORTH;
 
-		// Modify offsets to handle differing rotations and placing blocks on walls
-		if(placedSide == ForgeDirection.DOWN) {
-			int[] dim = getDimensions();
-			oy -= dim[0] + dim[1];
-		} else if(placedSide != ForgeDirection.UP) {
-			int[] rotDim = MultiblockHandlerXR.rotate(getDimensions(), dir);
-			if(rotDim != null) {
-				ox = x + placedSide.offsetX * rotDim[placedSide.getOpposite().ordinal()];
-				oz = z + placedSide.offsetZ * rotDim[placedSide.getOpposite().ordinal()];
-			}
+		if(i == 0) {
+			dir = ForgeDirection.getOrientation(2);
+		}
+		if(i == 1) {
+			dir = ForgeDirection.getOrientation(5);
+		}
+		if(i == 2) {
+			dir = ForgeDirection.getOrientation(3);
+		}
+		if(i == 3) {
+			dir = ForgeDirection.getOrientation(4);
 		}
 
-		if(!checkRequirement(world, ox - dir.offsetX * o, oy, oz - dir.offsetZ * o, dir, o)) {
+		dir = getDirModified(dir);
+
+		if(!checkRequirement(world, x, y, z, dir, o)) {
 
 			if(!pl.capabilities.isCreativeMode) {
 				ItemStack stack = pl.inventory.mainInventory[pl.inventory.currentItem];
@@ -243,27 +206,17 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
 
 		if(!world.isRemote) {
 			//this is separate because the multiblock rotation and the final meta might not be the same
-			int meta = getMetaForCore(world, ox, oy, oz, pl, dir.ordinal() + offset);
-
-			world.setBlock(ox, oy, oz, this, meta, 3);
-			IPersistentNBT.restoreData(world, ox, oy, oz, itemStack);
-			fillSpace(world, ox - dir.offsetX * o, oy, oz - dir.offsetZ * o, dir, o);
+			int meta = getMetaForCore(world, x + dir.offsetX * o, y + dir.offsetY * o, z + dir.offsetZ * o, (EntityPlayer) player, dir.ordinal() + offset);
+			//lastCore = new BlockPos(x + dir.offsetX * o, y + dir.offsetY * o, z + dir.offsetZ * o);
+			world.setBlock(x + dir.offsetX * o, y + dir.offsetY * o, z + dir.offsetZ * o, this, meta, 3);
+			IPersistentNBT.restoreData(world, x + dir.offsetX * o, y + dir.offsetY * o, z + dir.offsetZ * o, itemStack);
+			fillSpace(world, x, y, z, dir, o);
 		}
-
-		// Check if the placing player is inside the placed multiblock
-		if(isPlayerInside(world, pl)) internalPlayers.add(pl);
-
+		y -= getHeightOffset();
 		world.scheduleBlockUpdate(x, y, z, this, 1);
 		world.scheduleBlockUpdate(x, y, z, this, 2);
 
 		super.onBlockPlacedBy(world, x, y, z, player, itemStack);
-	}
-
-	private boolean isPlayerInside(World world, EntityPlayer player) {
-		int x = MathHelper.floor_double(player.posX);
-		int y = MathHelper.floor_double(player.posY + 0.1D);
-		int z = MathHelper.floor_double(player.posZ);
-		return world.getBlock(x, y, z) == this || world.getBlock(x, y + 1, z) == this;
 	}
 
 	/**
@@ -470,14 +423,9 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
 
 	public List<AxisAlignedBB> bounding = new ArrayList<>();
 
-	// players currently inside instances of this block
-	private List<EntityPlayer> internalPlayers = new ArrayList<>();
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void addCollisionBoxesToList(World world, int x, int y, int z, AxisAlignedBB entityBounding, List list, Entity entity) {
-		if(!internalPlayers.isEmpty() && internalPlayers.contains(entity))
-			return;
 
 		if(!this.useDetailedHitbox()) {
 			super.addCollisionBoxesToList(world, x, y, z, entityBounding, list, entity);

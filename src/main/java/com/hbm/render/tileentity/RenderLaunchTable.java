@@ -105,9 +105,8 @@ public class RenderLaunchTable extends TileEntitySpecialRenderer {
 		/// DRAW MISSILE START
 		GL11.glPushMatrix();
 		
-		if(launcher.load != null && launcher.load.fuselage != null && launcher.load.fuselage.top == launcher.padSize) {
+		if(launcher.load != null && launcher.load.fuselage != null && launcher.load.fuselage.top == launcher.padSize)
 			MissilePronter.prontMissile(MissileMultipart.loadFromStruct(launcher.load), Minecraft.getMinecraft().getTextureManager());
-		}
 		
 		GL11.glPopMatrix();
 		/// DRAW MISSILE END

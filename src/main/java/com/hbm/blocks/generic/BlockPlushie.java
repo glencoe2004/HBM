@@ -101,10 +101,7 @@ public class BlockPlushie extends BlockContainer implements IBlockMulti, IToolti
 			plushie.squishTimer = 11;
 			return true;
 		} else {
-			TileEntityPlushie plushie = (TileEntityPlushie) world.getTileEntity(x, y, z);
-			if (plushie != null) {
-				world.playSoundEffect(x + 0.5, y + 0.5, z + 0.5, plushie.type.sound, 0.25F, 1F);
-			}
+			world.playSoundEffect(x + 0.5, y + 0.5, z + 0.5, "hbm:block.squeakyToy", 0.25F, 1F);
 			return true;
 		}
 	}
@@ -155,22 +152,17 @@ public class BlockPlushie extends BlockContainer implements IBlockMulti, IToolti
 	}
 
 	public static enum PlushieType {
-		NONE(		"NONE",				null, null),
-		YOMI(		"Yomi",				"Hi! Can I be your rabbit friend?", "hbm:block.squeakyToy"),
-		NUMBERNINE(	"Number Nine",		"None of y'all deserve coal.", "hbm:block.squeakyToy"),
-		POOH(		"Winnie the Pooh",	"Beloved children's character with no malicious intent.", "hbm:block.squeakyToy"),
-		TETO(		"Kasane Teto",		"please help I've been trapped in her basement for da-", "hbm:block.teto"),
-		MIKU(		"Hatsune Miku",		"In your wifi, and your heart.", "hbm:block.miku"),
-		NERU(		"Akita Neru",			"Careful, she might electrocute you.", "hbm:block.akita");
+		NONE(		"NONE",				null),
+		YOMI(		"Yomi",				"Hi! Can I be your rabbit friend?"),
+		NUMBERNINE(	"Number Nine",		"None of y'all deserve coal."),
+		POOH(		"Winnie the Pooh",	"Beloved children's character with no malicious intent.");
 
 		public String label;
 		public String inscription;
-		public String sound;
 
-		private PlushieType(String label, String inscription, String sound) {
+		private PlushieType(String label, String inscription) {
 			this.label = label;
 			this.inscription = inscription;
-			this.sound = sound;
 		}
 	}
 

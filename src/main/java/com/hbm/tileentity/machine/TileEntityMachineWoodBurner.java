@@ -66,6 +66,7 @@ public class TileEntityMachineWoodBurner extends TileEntityMachineBase implement
 	public void updateEntity() {
 		
 		if(!worldObj.isRemote) {
+			
 			powerGen = 0;
 			
 			this.tank.setType(2, slots);
@@ -82,7 +83,7 @@ public class TileEntityMachineWoodBurner extends TileEntityMachineBase implement
 				if(this.burnTime <= 0) {
 					
 					if(slots[0] != null) {
-						int burn = burnModule.getBurnTime(slots[0]);
+						int burn = this.burnModule.getBurnTime(slots[0]);
 						if(burn > 0) {
 							EnumAshType type = TileEntityFireboxBase.getAshFromFuel(slots[0]);
 							if(type == EnumAshType.WOOD) ashLevelWood += burn;
@@ -101,7 +102,7 @@ public class TileEntityMachineWoodBurner extends TileEntityMachineBase implement
 						}
 					}
 					
-				} else if(this.power < maxPower && isOn && breatheAir(1)) {
+				} else if(this.power < this.maxPower && isOn){
 					this.burnTime--;
 					this.powerGen += 100;
 					if(worldObj.getTotalWorldTime() % 20 == 0) PollutionHandler.incrementPollution(worldObj, xCoord, yCoord, zCoord, PollutionType.SOOT, PollutionHandler.SOOT_PER_SECOND);
@@ -109,7 +110,7 @@ public class TileEntityMachineWoodBurner extends TileEntityMachineBase implement
 				
 			} else {
 				
-				if(this.power < maxPower && tank.getFill() > 0 && isOn && breatheAir(1)) {
+				if(this.power < this.maxPower && tank.getFill() > 0 && isOn) {
 					FT_Flammable trait = tank.getTankType().getTrait(FT_Flammable.class);
 					
 					if(trait != null) {
@@ -126,7 +127,7 @@ public class TileEntityMachineWoodBurner extends TileEntityMachineBase implement
 			}
 			
 			this.power += this.powerGen;
-			if(this.power > maxPower) this.power = maxPower;
+			if(this.power > this.maxPower) this.power = this.maxPower;
 			
 			this.networkPackNT(25);
 		} else {

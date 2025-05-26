@@ -8,11 +8,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class BlockOutgas extends Block {
+public class BlockOutgas extends BlockOre {
 	
 	boolean randomTick;
 	int rate;
@@ -39,7 +38,7 @@ public class BlockOutgas extends Block {
 	}
 	
 	protected Block getGas() {
-		if(this == ModBlocks.ore_uranium_scorched ||
+		if(this == ModBlocks.ore_uranium || this == ModBlocks.ore_uranium_scorched || 
 				this == ModBlocks.ore_gneiss_uranium || this == ModBlocks.ore_gneiss_uranium_scorched || 
 				this == ModBlocks.ore_nether_uranium || this == ModBlocks.ore_nether_uranium_scorched) {
 			return ModBlocks.gas_radon;
@@ -55,7 +54,7 @@ public class BlockOutgas extends Block {
 			return ModBlocks.gas_monoxide;
 		}
 		
-		if(this == ModBlocks.ore_gneiss_asbestos ||
+		if(this == ModBlocks.ore_asbestos || this == ModBlocks.ore_gneiss_asbestos ||
 				this == ModBlocks.block_asbestos || this == ModBlocks.deco_asbestos ||
 				this == ModBlocks.brick_asbestos || this == ModBlocks.tile_lab ||
 				this == ModBlocks.tile_lab_cracked || this == ModBlocks.tile_lab_broken) {
@@ -63,22 +62,6 @@ public class BlockOutgas extends Block {
 		}
 		
 		return Blocks.air;
-	}
-	
-	@Override
-	public int quantityDroppedWithBonus(int fortune, Random rand) {
-		
-		if(fortune > 0 && Item.getItemFromBlock(this) != this.getItemDropped(0, rand, fortune)) {
-			int mult = rand.nextInt(fortune + 2) - 1;
-
-			if(mult < 0) {
-				mult = 0;
-			}
-
-			return this.quantityDropped(rand) * (mult + 1);
-		} else {
-			return this.quantityDropped(rand);
-		}
 	}
 
 	@Override

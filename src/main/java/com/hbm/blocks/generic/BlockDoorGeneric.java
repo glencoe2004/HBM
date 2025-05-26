@@ -3,7 +3,6 @@ package com.hbm.blocks.generic;
 import java.util.List;
 
 import com.hbm.blocks.BlockDummyable;
-import com.hbm.handler.atmosphere.IBlockSealable;
 import com.hbm.interfaces.IBomb;
 import com.hbm.items.special.ItemDoorSkin;
 import com.hbm.tileentity.DoorDecl;
@@ -22,7 +21,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
-public class BlockDoorGeneric extends BlockDummyable implements IBomb, IBlockSealable {
+public class BlockDoorGeneric extends BlockDummyable implements IBomb {
 
 	public DoorDecl type;
 	
@@ -166,10 +165,4 @@ public class BlockDoorGeneric extends BlockDummyable implements IBomb, IBlockSea
 		}
 		return AxisAlignedBB.getBoundingBox(x, y, z, x + 1, y + 1, z + 1);
 	}
-
-	@Override
-	public boolean isSealed(World world, int x, int y, int z) {
-		return !getBlocksMovement(world, x, y, z);
-	}
-	
 }

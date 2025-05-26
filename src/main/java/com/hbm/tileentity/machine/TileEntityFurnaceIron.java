@@ -91,7 +91,7 @@ public class TileEntityFurnaceIron extends TileEntityMachineBase implements IGUI
 				}
 			}
 
-			if(canSmelt() && breatheAir(worldObj.getTotalWorldTime() % 5 == 0 ? 1 : 0)) {
+			if(canSmelt()) {
 				wasOn = true;
 				this.progress++;
 				this.burnTime--;

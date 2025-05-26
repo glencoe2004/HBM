@@ -25,10 +25,10 @@ import net.minecraft.world.World;
 public class Meteorite {
 	
 	public static boolean safeMode = false;
-	public static boolean osmiridium = false;
-	public void generate(World world, Random rand, int x, int y, int z, boolean safe, boolean allowSpecials, boolean damagingImpact, boolean osmiridic) {
+
+	public void generate(World world, Random rand, int x, int y, int z, boolean safe, boolean allowSpecials, boolean damagingImpact) {
 		safeMode = safe;
-		osmiridium = osmiridic;
+		
 		if(replacables.isEmpty()) {
 			generateReplacables();
 		}
@@ -79,7 +79,7 @@ public class Meteorite {
 				ExplosionLarge.spawnRubble(world, x, y, z, 25);
 				return;
 			case 5:
-				// Large treasure-only meteoritew
+				// Large treasure-only meteorite
 				List<ItemStack> list4 = new ArrayList<ItemStack>();
 				list4.add(new ItemStack(ModBlocks.block_meteor_treasure));
 				list4.add(new ItemStack(ModBlocks.block_meteor_broken));
